@@ -9,14 +9,7 @@
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-:root{
-  --bg:#f8f9fc;--s1:#ffffff;--s2:#f4f5f8;--s3:#e8eaef;
-  --border:#d5d8e0;--border2:#c1c5d1;
-  --t1:#1a1d2e;--t2:#5b6278;--t3:#8a90a8;
-  --blue:#3b82f6;--green:#10b981;--red:#ef4444;--amber:#f59e0b;--purple:#8b5cf6;
-  --bb:#6366f1;--mm:#f97316;--lj:#14b8a6;
-  --font:'Inter',sans-serif;--mono:'JetBrains Mono',monospace;
-}
+:root{--bg:#f8f9fc;--s1:#ffffff;--s2:#f4f5f8;--s3:#e8eaef;--border:#d5d8e0;--border2:#c1c5d1;--t1:#1a1d2e;--t2:#5b6278;--t3:#8a90a8;--blue:#3b82f6;--green:#10b981;--red:#ef4444;--amber:#f59e0b;--purple:#8b5cf6;--bb:#6366f1;--mm:#f97316;--lj:#14b8a6;--font:'Inter',sans-serif;--mono:'JetBrains Mono',monospace;}
 body{font-family:var(--font);background:var(--bg);color:var(--t1);min-height:100vh}
 .header{background:var(--s1);border-bottom:2px solid var(--border);padding:16px 32px;position:sticky;top:0;z-index:100;box-shadow:0 1px 3px rgba(0,0,0,.04)}
 .header-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:10px}
@@ -29,8 +22,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--t1);min-height:100
 .filter-btn:hover{border-color:var(--blue);color:var(--blue)}
 .filter-btn.active{background:var(--blue);color:white;border-color:var(--blue)}
 .refresh-btn{font-family:var(--font);font-size:12px;font-weight:600;background:var(--green);color:white;border:none;border-radius:8px;padding:7px 16px;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all .2s}
-.refresh-btn:hover{opacity:.9}
-.refresh-btn:disabled{opacity:.6;cursor:not-allowed}
+.refresh-btn:hover{opacity:.9}.refresh-btn:disabled{opacity:.6;cursor:not-allowed}
 .auto-badge{font-size:10px;background:rgba(16,185,129,.15);color:var(--green);border:1.5px solid rgba(16,185,129,.3);border-radius:20px;padding:3px 10px;font-weight:600}
 .countdown{font-size:10px;color:var(--t3);font-family:var(--mono)}
 .month-filters{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
@@ -68,7 +60,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--t1);min-height:100
 .bc-stat-sub{font-size:10px;color:var(--t2);margin-top:3px}
 .bc-bar-wrap{margin-top:4px}
 .bc-bar-label{display:flex;justify-content:space-between;font-size:10px;color:var(--t2);margin-bottom:6px;font-weight:500}
-.bc-bar{height:6px;border-radius:4px;background:var(--s3);overflow:hidden;display:flex;gap:2px}
+.bc-bar{height:6px;border-radius:4px;background:var(--s3);overflow:hidden;display:flex}
 .bc-bar-seg{height:100%;transition:width .8s ease}
 .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px}
 .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-bottom:20px}
@@ -101,7 +93,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--t1);min-height:100
 .reason-bars{display:flex;flex-direction:column;gap:10px;margin-top:8px}
 .rb-row{display:flex;align-items:center;gap:10px}
 .rb-label{font-size:11px;font-weight:500;color:var(--t1);width:180px;flex-shrink:0}
-.rb-track{flex:1;height:24px;background:var(--s2);border-radius:6px;overflow:hidden;position:relative;border:1px solid var(--border)}
+.rb-track{flex:1;height:24px;background:var(--s2);border-radius:6px;overflow:hidden;border:1px solid var(--border)}
 .rb-fill{height:100%;border-radius:5px;display:flex;align-items:center;padding-left:10px;font-size:10px;font-family:var(--mono);font-weight:600;color:white;transition:width 1s ease}
 .rb-pct{font-size:11px;font-family:var(--mono);font-weight:600;color:var(--t1);width:50px;text-align:right;flex-shrink:0}
 .heatmap-grid{display:grid;gap:6px}
@@ -118,7 +110,6 @@ body{font-family:var(--font);background:var(--bg);color:var(--t1);min-height:100
 .loading-overlay.show{display:flex}
 .spinner{width:40px;height:40px;border:3px solid var(--border);border-top-color:var(--blue);border-radius:50%;animation:spin 0.8s linear infinite}
 .loading-text{font-size:14px;color:var(--t2);font-weight:500}
-.no-data{text-align:center;padding:40px;color:var(--t3);font-size:14px}
 @media(max-width:1200px){.kpi-row,.grid-3{grid-template-columns:repeat(3,1fr)}.brand-grid{grid-template-columns:1fr 1fr}}
 @media(max-width:900px){.kpi-row,.grid-2,.brand-grid,.grid-3{grid-template-columns:1fr}}
 @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
@@ -127,35 +118,25 @@ body{font-family:var(--font);background:var(--bg);color:var(--t1);min-height:100
 </style>
 </head>
 <body>
-
-<div class="loading-overlay" id="loading-overlay">
-  <div class="spinner"></div>
-  <div class="loading-text">Fetching latest data from Google Sheets...</div>
-</div>
-
+<div class="loading-overlay" id="loading-overlay"><div class="spinner"></div><div class="loading-text">Fetching latest data from Google Sheets...</div></div>
 <div class="header">
   <div class="header-top">
     <div class="logo-area">
       <div class="logo-icon">RTV</div>
-      <div class="logo-text">
-        <h1>RTV QC Analytics Dashboard</h1>
-        <p id="data-source-label">Connecting to Google Sheets...</p>
-      </div>
+      <div class="logo-text"><h1>RTV QC Analytics Dashboard</h1><p id="data-source-label">Connecting to Google Sheets...</p></div>
     </div>
     <div class="header-right">
       <span class="auto-badge">⚡ Auto-refresh ON</span>
       <span class="countdown" id="countdown-label">Next refresh in 5:00</span>
       <button class="refresh-btn" id="refresh-btn" onclick="manualRefresh()">
-        <svg id="refresh-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
         Refresh Now
       </button>
     </div>
   </div>
   <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;flex-wrap:wrap">
     <span class="month-label">Filter:</span>
-    <div class="month-filters" id="month-filters">
-      <button class="filter-btn active" onclick="filterMonth('all',this)">All Months</button>
-    </div>
+    <div class="month-filters" id="month-filters"><button class="filter-btn active" onclick="filterMonth('all',this)">All Months</button></div>
   </div>
   <div class="nav-tabs">
     <button class="nav-tab active" onclick="showPanel('overview',this)">Overview</button>
@@ -165,29 +146,17 @@ body{font-family:var(--font);background:var(--bg);color:var(--t1);min-height:100
     <button class="nav-tab" onclick="showPanel('heatmap',this)">Defect Heatmap</button>
   </div>
 </div>
-
 <div class="content">
-
 <div class="panel active" id="overview">
   <div class="kpi-row" id="kpi-row"></div>
   <div class="brand-grid" id="brand-grid"></div>
   <div class="grid-2">
-    <div class="card">
-      <div class="card-head"><div><div class="card-title">Defect Breakdown by Category</div><div class="card-sub">Breakdown of return reasons</div></div></div>
-      <div class="chart-wrap"><canvas id="c-defect"></canvas></div>
-    </div>
-    <div class="card">
-      <div class="card-head"><div><div class="card-title">Top 10 High-Risk Channels</div><div class="card-sub">Highest defect % and rework %</div></div></div>
-      <div class="chart-wrap" style="height:350px"><canvas id="c-channels"></canvas></div>
-    </div>
+    <div class="card"><div class="card-head"><div><div class="card-title">Defect Breakdown by Category</div><div class="card-sub">Breakdown of rejection reasons</div></div></div><div class="chart-wrap"><canvas id="c-defect"></canvas></div></div>
+    <div class="card"><div class="card-head"><div><div class="card-title">Top 10 High-Risk Channels</div><div class="card-sub">Highest defect % and rework %</div></div></div><div class="chart-wrap" style="height:350px"><canvas id="c-channels"></canvas></div></div>
   </div>
 </div>
-
 <div class="panel" id="brands">
-  <div class="card">
-    <div class="card-head"><div class="card-title">Brand Performance Comparison</div></div>
-    <div class="chart-wrap"><canvas id="c-brand-comp"></canvas></div>
-  </div>
+  <div class="card"><div class="card-head"><div class="card-title">Brand Performance Comparison</div></div><div class="chart-wrap"><canvas id="c-brand-comp"></canvas></div></div>
   <div class="grid-3" id="brand-reason-charts"></div>
   <h3 style="margin:32px 0 16px;font-size:16px;font-weight:700;color:var(--t1)">📈 Trend Analysis</h3>
   <div class="grid-2">
@@ -197,313 +166,178 @@ body{font-family:var(--font);background:var(--bg);color:var(--t1);min-height:100
   <div class="card"><div class="card-head"><div class="card-title">Monthly Defect Rate & Rework Rate Trends (by Brand)</div></div><div class="chart-wrap"><canvas id="c-trend-dr"></canvas></div></div>
   <div class="card"><div class="card-head"><div class="card-title">Channel-wise Return Trends — Good / Bad / Rework %</div></div><div class="chart-wrap"><canvas id="c-channel-trend"></canvas></div></div>
 </div>
-
 <div class="panel" id="channels">
-  <div class="card">
-    <div class="card-head"><div class="card-title">Channel Performance — All Returns</div></div>
-    <div class="table-container table-wrap">
-      <table class="data-table"><thead><tr>
-        <th onclick="sortTable('channel-tbody',0)">Channel</th>
-        <th onclick="sortTable('channel-tbody',1)">Total</th>
-        <th onclick="sortTable('channel-tbody',2)">Good</th>
-        <th onclick="sortTable('channel-tbody',3)">Bad</th>
-        <th onclick="sortTable('channel-tbody',4)">Rework</th>
-        <th onclick="sortTable('channel-tbody',5)">Defect %</th>
-        <th onclick="sortTable('channel-tbody',6)">Rework %</th>
-        <th onclick="sortTable('channel-tbody',7)">Risk</th>
-      </tr></thead>
-      <tbody id="channel-tbody"></tbody></table>
-    </div>
+  <div class="card"><div class="card-head"><div class="card-title">Channel Performance — All Returns</div></div>
+    <div class="table-container table-wrap"><table class="data-table"><thead><tr>
+      <th onclick="sortTable('channel-tbody',0)">Channel</th><th onclick="sortTable('channel-tbody',1)">Total</th><th onclick="sortTable('channel-tbody',2)">Good</th><th onclick="sortTable('channel-tbody',3)">Bad</th><th onclick="sortTable('channel-tbody',4)">Rework</th><th onclick="sortTable('channel-tbody',5)">Defect %</th><th onclick="sortTable('channel-tbody',6)">Rework %</th><th onclick="sortTable('channel-tbody',7)">Risk</th>
+    </tr></thead><tbody id="channel-tbody"></tbody></table></div>
   </div>
 </div>
-
 <div class="panel" id="skus">
   <div class="card">
     <div class="card-head">
       <div><div class="card-title">Top 10 Critical SKUs by Brand</div><div class="card-sub">Ranked by highest Rework + Bad count (worst first)</div></div>
-      <div class="controls">
-        <select class="select-ctrl" id="sku-brand-filter" onchange="renderSkuTable()">
-          <option value="all">All Brands</option>
-          <option value="bb">Be Bodywise</option>
-          <option value="mm">Man Matters</option>
-          <option value="lj">Little Joys</option>
-        </select>
-      </div>
+      <div class="controls"><select class="select-ctrl" id="sku-brand-filter" onchange="renderSkuTable()"><option value="all">All Brands</option><option value="bb">Be Bodywise</option><option value="mm">Man Matters</option><option value="lj">Little Joys</option></select></div>
     </div>
-    <div class="table-container table-wrap">
-      <table class="data-table"><thead><tr><th>Rank</th><th>Brand</th><th>SKU</th><th>Product Name</th><th>Total</th><th>Good</th><th>Bad</th><th>Rework</th><th>Defect %</th><th>Rework %</th><th>Risk</th></tr></thead>
-      <tbody id="sku-tbody"></tbody></table>
-    </div>
+    <div class="table-container table-wrap"><table class="data-table"><thead><tr><th>Rank</th><th>Brand</th><th>SKU</th><th>Product Name</th><th>Total</th><th>Good</th><th>Bad</th><th>Rework</th><th>Defect %</th><th>Rework %</th><th>Risk</th></tr></thead><tbody id="sku-tbody"></tbody></table></div>
   </div>
   <div class="grid-2">
     <div class="card"><div class="card-head"><div class="card-title" style="color:var(--mm)">Man Matters — Critical SKUs</div></div><div class="chart-wrap" style="height:240px"><canvas id="c-sku-mm"></canvas></div></div>
     <div class="card"><div class="card-head"><div class="card-title" style="color:var(--lj)">Little Joys — Critical SKUs</div></div><div class="chart-wrap" style="height:240px"><canvas id="c-sku-lj"></canvas></div></div>
   </div>
 </div>
-
 <div class="panel" id="heatmap">
-  <div class="card">
-    <div class="card-head"><div class="card-title">Defect Type Heatmap — Top 20 Channels × Top 8 Defect Types</div></div>
-    <div id="heatmap-container"></div>
-  </div>
+  <div class="card"><div class="card-head"><div class="card-title">Defect Type Heatmap — Top 20 Channels × Top 8 Defect Types</div></div><div id="heatmap-container"></div></div>
 </div>
-
 </div>
-
 <script>
-// ─────────────────────────────────────────────
-// CONFIG
-// ─────────────────────────────────────────────
-const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSismHdOKJigedmrPENc8HXyW4TvqHek7e1ASCluZfi1s3jgQPZGhYJQjb_F5IoarAnOmybH7aIqrWG/pub?gid=1227720756&single=true&output=csv';
-const AUTO_REFRESH_SECONDS = 300; // 5 minutes
+const CSV_URL='https://docs.google.com/spreadsheets/d/e/2PACX-1vSismHdOKJigedmrPENc8HXyW4TvqHek7e1ASCluZfi1s3jgQPZGhYJQjb_F5IoarAnOmybH7aIqrWG/pub?gid=1227720756&single=true&output=csv';
+const AUTO_REFRESH_SECONDS=300;
+const MONTH_ORDER=['January','February','March','April','May','June','July','August','September','October','November','December'];
 
-// Month order for sorting
-const MONTH_ORDER = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+// ── VERIFIED COLUMN INDICES FROM ACTUAL CSV ANALYSIS ──────────────
+// Col B [idx 1]  = Month text (April26, March26, May26) → month name
+// Col E [idx 4]  = Channel Name
+// Col L [idx 11] = SKU
+// Col M [idx 12] = Product Name
+// Col N [idx 13] = Qty
+// Col S [idx 18] = Status (Good / Bad / Rework)  ← CORRECT (NOT idx 19!)
+// Col T [idx 19] = Rejection Reason               ← CORRECT (NOT Status!)
+const COL_MONTH=1, COL_CHANNEL=4, COL_SKU=11, COL_PRODUCT=12, COL_QTY=13, COL_STATUS=18, COL_REASON=19;
 
-// ─────────────────────────────────────────────
-// STATE
-// ─────────────────────────────────────────────
-let RAW_DATA = [];
-let CURRENT_MONTH = 'all';
-let AVAILABLE_MONTHS = [];
-let BRANDDATA = {bb:{}, mm:{}, lj:{}};
-let CHARTS = {};
-let countdownSeconds = AUTO_REFRESH_SECONDS;
-let countdownInterval = null;
-let autoRefreshTimer = null;
+let RAW_DATA=[], CURRENT_MONTH='all', AVAILABLE_MONTHS=[], BRANDDATA={bb:{},mm:{},lj:{}}, CHARTS={};
+let countdownSeconds=AUTO_REFRESH_SECONDS, countdownInterval=null;
 
-// ─────────────────────────────────────────────
-// INIT
-// ─────────────────────────────────────────────
-async function init() {
-  showLoading(true);
-  await loadData();
-  processData();
-  buildMonthFilters();
-  renderAll();
-  showLoading(false);
-  startAutoRefresh();
-}
+async function init(){showLoading(true);await loadData();processData();buildMonthFilters();renderAll();showLoading(false);startAutoRefresh();}
+function showLoading(s){document.getElementById('loading-overlay').classList.toggle('show',s);}
 
-function showLoading(show) {
-  document.getElementById('loading-overlay').classList.toggle('show', show);
-}
-
-// ─────────────────────────────────────────────
-// DATA LOADING
-// ─────────────────────────────────────────────
-async function loadData() {
-  try {
-    const resp = await fetch(CSV_URL + '&t=' + Date.now()); // cache-bust
-    if (!resp.ok) throw new Error('HTTP ' + resp.status);
-    const csv = await resp.text();
-    RAW_DATA = parseCSV(csv);
-    // Detect all unique months from data, sorted chronologically
-    const monthSet = new Set(RAW_DATA.map(r => r.month).filter(Boolean));
-    AVAILABLE_MONTHS = MONTH_ORDER.filter(m => monthSet.has(m));
-    const now = new Date().toLocaleTimeString();
-    document.getElementById('data-source-label').textContent =
-      `✅ Live • ${RAW_DATA.length.toLocaleString()} records • ${AVAILABLE_MONTHS.join(', ')} • Updated ${now}`;
-  } catch (err) {
-    console.warn('Sheet fetch failed:', err);
-    if (RAW_DATA.length === 0) {
-      RAW_DATA = sampleData();
-      AVAILABLE_MONTHS = MONTH_ORDER.slice(0, 4);
-    }
-    document.getElementById('data-source-label').textContent =
-      '⚠️ Using cached/sample data — Google Sheets temporarily unavailable';
+async function loadData(){
+  try{
+    const resp=await fetch(CSV_URL+'&t='+Date.now());
+    if(!resp.ok)throw new Error('HTTP '+resp.status);
+    const csv=await resp.text();
+    RAW_DATA=parseCSV(csv);
+    const monthSet=new Set(RAW_DATA.map(r=>r.month).filter(Boolean));
+    AVAILABLE_MONTHS=MONTH_ORDER.filter(m=>monthSet.has(m));
+    const now=new Date().toLocaleTimeString();
+    document.getElementById('data-source-label').textContent=`✅ Live • ${RAW_DATA.length.toLocaleString()} records • ${AVAILABLE_MONTHS.join(', ')} • Updated ${now}`;
+  }catch(err){
+    console.warn('Fetch failed:',err);
+    if(RAW_DATA.length===0){RAW_DATA=sampleData();AVAILABLE_MONTHS=MONTH_ORDER.slice(0,5);}
+    document.getElementById('data-source-label').textContent='⚠️ Using cached/sample data — Google Sheets temporarily unavailable';
   }
 }
 
-function parseCSV(text) {
-  const lines = text.split('\n').filter(l => l.trim());
-  if (lines.length < 2) return [];
-  const headers = parseCSVLine(lines[0]).map(h => h.replace(/"/g,'').trim());
-  const data = [];
-  for (let i = 1; i < lines.length; i++) {
-    const vals = parseCSVLine(lines[i]);
-    const row = {};
-    headers.forEach((h, idx) => row[h] = (vals[idx] || '').replace(/"/g,'').trim());
-    const mapped = {
-      month:   toMonth(row['Month'] || ''),
-      channel: row['Channel Name'] || 'Unknown',
-      sku:     row['SKU'] || row['EAN'] || '',
-      product: row['Prod'] || row['Product Name'] || row['SKU'] || 'Unknown',
-      qty:     Math.max(1, parseInt(row['Qty']) || 1),
-      status:  toStatus(row['Status'] || ''),
-      reason:  row['Rejection Reason'] || row['Reason'] || 'Unknown',
-      brand:   toBrand(row['SKU'] || row['Prod'] || '')
-    };
-    if (mapped.month && mapped.status && mapped.status !== 'Unknown') data.push(mapped);
+function parseCSV(text){
+  const lines=text.split('\n').filter(l=>l.trim());
+  if(lines.length<2)return[];
+  const headers=parseCSVLine(lines[0]);
+  console.log(`COLUMN MAP — Month[${COL_MONTH}]="${headers[COL_MONTH]}" | Status[${COL_STATUS}]="${headers[COL_STATUS]}" | Reason[${COL_REASON}]="${headers[COL_REASON]}" | Qty[${COL_QTY}]="${headers[COL_QTY]}"`);
+  const data=[];
+  for(let i=1;i<lines.length;i++){
+    const v=parseCSVLine(lines[i]);
+    if(v.length<15)continue;
+    const month=textToMonth(v[COL_MONTH]||'');
+    if(!month)continue;
+    const statusRaw=(v[COL_STATUS]||'').trim();
+    const status=toStatus(statusRaw);
+    if(status==='Unknown')continue; // Skip rows with no recognised status
+    const skuVal=(v[COL_SKU]||'').trim();
+    const prodVal=(v[COL_PRODUCT]||'').trim();
+    data.push({
+      month, status,
+      channel:(v[COL_CHANNEL]||'Unknown').trim()||'Unknown',
+      sku:skuVal,
+      product:prodVal||skuVal||'Unknown',
+      qty:Math.max(1,parseInt(v[COL_QTY])||1),
+      reason:(v[COL_REASON]||'Unknown').trim()||'Unknown',
+      brand:toBrand(skuVal||prodVal)
+    });
   }
+  const sc={};data.forEach(r=>{sc[r.status]=(sc[r.status]||0)+1;});
+  const mc={};data.forEach(r=>{mc[r.month]=(mc[r.month]||0)+1;});
+  console.log('Parsed:',data.length,'| Status dist:',sc,'| Months:',mc);
   return data;
 }
 
-function parseCSVLine(line) {
-  const vals = []; let cur = '', inQ = false;
-  for (const c of line) {
-    if (c === '"') inQ = !inQ;
-    else if (c === ',' && !inQ) { vals.push(cur.trim()); cur = ''; }
-    else cur += c;
-  }
-  vals.push(cur.trim());
-  return vals;
+function parseCSVLine(line){
+  const vals=[];let cur='',inQ=false;
+  for(const c of line){if(c==='"')inQ=!inQ;else if(c===','&&!inQ){vals.push(cur.trim());cur='';}else cur+=c;}
+  vals.push(cur.trim());return vals;
 }
 
-function toMonth(s) {
-  if (!s) return '';
-  const l = s.toLowerCase();
-  const map = {jan:'January',feb:'February',mar:'March',apr:'April',may:'May',jun:'June',jul:'July',aug:'August',sep:'September',oct:'October',nov:'November',dec:'December'};
-  for (const [k,v] of Object.entries(map)) if (l.includes(k)) return v;
-  return '';
-}
-function toBrand(t) {
-  if (!t) return 'Be Bodywise';
-  const u = t.toUpperCase();
-  if (u.includes('MM') || u.includes('MAN MATTERS')) return 'Man Matters';
-  if (u.includes('LJ') || u.includes('LITTLE')) return 'Little Joys';
-  return 'Be Bodywise';
-}
-function toStatus(s) {
-  const l = s.toLowerCase().trim();
-  if (l === 'good' || l === 'ok') return 'Good';
-  if (l === 'rework' || l === 'repair') return 'Rework';
-  if (l === 'bad' || l === 'reject') return 'Bad';
-  return s || 'Unknown';
+// Extract month from text like "April26", "March26", "May26"
+function textToMonth(s){
+  if(!s)return'';
+  const l=s.toLowerCase();
+  const map={jan:'January',feb:'February',mar:'March',apr:'April',may:'May',jun:'June',jul:'July',aug:'August',sep:'September',oct:'October',nov:'November',dec:'December'};
+  for(const[k,v]of Object.entries(map))if(l.includes(k))return v;
+  return'';
 }
 
-// ─────────────────────────────────────────────
-// MONTH FILTER BUTTONS — built dynamically from data
-// ─────────────────────────────────────────────
-function buildMonthFilters() {
-  const container = document.getElementById('month-filters');
-  // Keep "All" button, add one per available month
-  container.innerHTML = '<button class="filter-btn ' + (CURRENT_MONTH==='all'?'active':'') + '" onclick="filterMonth(\'all\',this)">All Months</button>';
-  AVAILABLE_MONTHS.forEach(m => {
-    const active = CURRENT_MONTH === m.toLowerCase() ? 'active' : '';
-    container.innerHTML += `<button class="filter-btn ${active}" onclick="filterMonth('${m.toLowerCase()}',this)">${m}</button>`;
-  });
+function toStatus(s){
+  if(!s)return'Unknown';
+  const l=s.toLowerCase().trim();
+  if(l==='good'||l==='ok')return'Good';
+  if(l==='rework'||l==='repair')return'Rework';
+  if(l==='bad'||l==='reject'||l==='rejected')return'Bad';
+  return'Unknown';
 }
 
-function filterMonth(month, btn) {
-  CURRENT_MONTH = month;
-  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  processData();
-  renderAll();
+function toBrand(t){
+  if(!t)return'Be Bodywise';
+  const u=t.toUpperCase();
+  if(u.startsWith('MM')||u.includes('MWMM')||u.includes('MAN MATTERS'))return'Man Matters';
+  if(u.startsWith('LJ')||u.includes('MWLJ')||u.includes('LITTLE'))return'Little Joys';
+  return'Be Bodywise';
 }
 
-// ─────────────────────────────────────────────
-// AUTO-REFRESH
-// ─────────────────────────────────────────────
-function startAutoRefresh() {
-  clearInterval(countdownInterval);
-  clearTimeout(autoRefreshTimer);
-  countdownSeconds = AUTO_REFRESH_SECONDS;
-  updateCountdown();
-  countdownInterval = setInterval(() => {
-    countdownSeconds--;
-    updateCountdown();
-    if (countdownSeconds <= 0) {
-      clearInterval(countdownInterval);
-      silentRefresh();
-    }
-  }, 1000);
+function buildMonthFilters(){
+  const c=document.getElementById('month-filters');
+  c.innerHTML='<button class="filter-btn '+(CURRENT_MONTH==='all'?'active':'')+'" onclick="filterMonth(\'all\',this)">All Months</button>';
+  AVAILABLE_MONTHS.forEach(m=>{const a=CURRENT_MONTH===m.toLowerCase()?'active':'';c.innerHTML+=`<button class="filter-btn ${a}" onclick="filterMonth('${m.toLowerCase()}',this)">${m}</button>`;});
+}
+function filterMonth(m,btn){CURRENT_MONTH=m;document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');processData();renderAll();}
+
+function startAutoRefresh(){clearInterval(countdownInterval);countdownSeconds=AUTO_REFRESH_SECONDS;updateCountdown();countdownInterval=setInterval(()=>{countdownSeconds--;updateCountdown();if(countdownSeconds<=0){clearInterval(countdownInterval);silentRefresh();}},1000);}
+function updateCountdown(){const m=Math.floor(countdownSeconds/60),s=countdownSeconds%60;document.getElementById('countdown-label').textContent=`Next refresh in ${m}:${String(s).padStart(2,'0')}`;}
+async function silentRefresh(){await loadData();processData();buildMonthFilters();renderAll();startAutoRefresh();}
+async function manualRefresh(){
+  const btn=document.getElementById('refresh-btn');btn.disabled=true;
+  showLoading(true);await loadData();processData();buildMonthFilters();renderAll();showLoading(false);startAutoRefresh();
+  btn.disabled=false;btn.innerHTML='✓ Updated!';
+  setTimeout(()=>{btn.innerHTML='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg> Refresh Now';},2500);
 }
 
-function updateCountdown() {
-  const m = Math.floor(countdownSeconds / 60);
-  const s = countdownSeconds % 60;
-  document.getElementById('countdown-label').textContent = `Next refresh in ${m}:${String(s).padStart(2,'0')}`;
-}
+function filtered(){if(CURRENT_MONTH==='all')return RAW_DATA;return RAW_DATA.filter(r=>r.month.toLowerCase()===CURRENT_MONTH);}
 
-async function silentRefresh() {
-  await loadData();
-  processData();
-  buildMonthFilters();
-  renderAll();
-  startAutoRefresh();
-}
-
-async function manualRefresh() {
-  const btn = document.getElementById('refresh-btn');
-  btn.disabled = true;
-  btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="animation:spin .8s linear infinite"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg> Refreshing...';
-  showLoading(true);
-  await loadData();
-  processData();
-  buildMonthFilters();
-  renderAll();
-  showLoading(false);
-  startAutoRefresh();
-  btn.disabled = false;
-  btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg> Updated!';
-  setTimeout(() => {
-    btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg> Refresh Now';
-  }, 2500);
-}
-
-// ─────────────────────────────────────────────
-// DATA PROCESSING
-// ─────────────────────────────────────────────
-function filtered() {
-  if (CURRENT_MONTH === 'all') return RAW_DATA;
-  return RAW_DATA.filter(r => r.month.toLowerCase() === CURRENT_MONTH);
-}
-
-function processData() {
-  const f = filtered();
-  ['bb','mm','lj'].forEach(code => {
-    const name = code==='bb'?'Be Bodywise':code==='mm'?'Man Matters':'Little Joys';
-    const bd = f.filter(r => r.brand === name);
-    const total = bd.reduce((s,r) => s+r.qty, 0) || 1;
-    const good  = bd.filter(r=>r.status==='Good').reduce((s,r)=>s+r.qty,0);
-    const rework= bd.filter(r=>r.status==='Rework').reduce((s,r)=>s+r.qty,0);
-    const bad   = bd.filter(r=>r.status==='Bad').reduce((s,r)=>s+r.qty,0);
-    const reasons = {};
-    bd.filter(r=>r.status!=='Good').forEach(r=>{reasons[r.reason]=(reasons[r.reason]||0)+r.qty;});
-    const skuMap = {};
-    bd.forEach(r=>{
-      const k=r.sku+'|'+r.product;
-      if(!skuMap[k]) skuMap[k]={sku:r.sku,name:r.product,tot:0,good:0,bad:0,rw:0};
-      skuMap[k].tot+=r.qty;
-      if(r.status==='Good')skuMap[k].good+=r.qty;
-      else if(r.status==='Bad')skuMap[k].bad+=r.qty;
-      else if(r.status==='Rework')skuMap[k].rw+=r.qty;
-    });
-    BRANDDATA[code]={
-      name, total, good, rework, bad,
-      defectRate:((rework+bad)/total*100).toFixed(1),
-      reasons:Object.entries(reasons).sort((a,b)=>b[1]-a[1]).slice(0,8),
-      skus:Object.values(skuMap).sort((a,b)=>(b.bad+b.rw)-(a.bad+a.rw)).slice(0,10)
-    };
-  });
-}
-
-// ─────────────────────────────────────────────
-// RENDER ALL
-// ─────────────────────────────────────────────
-function renderAll(){renderKPIs();renderBrandCards();renderOverviewCharts();renderBrandAnalysis();renderChannelTable();renderSkuTable();renderSkuCharts();renderTrends();renderHeatmap();}
-
-function showPanel(id,btn){
-  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
-  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
-  btn.classList.add('active');
-  document.getElementById(id).classList.add('active');
-}
-
-// ─────────────────────────────────────────────
-// KPIs
-// ─────────────────────────────────────────────
-function renderKPIs(){
+function processData(){
   const f=filtered();
-  const total=f.reduce((s,r)=>s+r.qty,0)||1;
+  ['bb','mm','lj'].forEach(code=>{
+    const name=code==='bb'?'Be Bodywise':code==='mm'?'Man Matters':'Little Joys';
+    const bd=f.filter(r=>r.brand===name);
+    const total=bd.reduce((s,r)=>s+r.qty,0)||1;
+    const good=bd.filter(r=>r.status==='Good').reduce((s,r)=>s+r.qty,0);
+    const rework=bd.filter(r=>r.status==='Rework').reduce((s,r)=>s+r.qty,0);
+    const bad=bd.filter(r=>r.status==='Bad').reduce((s,r)=>s+r.qty,0);
+    const reasons={};bd.filter(r=>r.status!=='Good').forEach(r=>{reasons[r.reason]=(reasons[r.reason]||0)+r.qty;});
+    const skuMap={};
+    bd.forEach(r=>{const k=r.sku+'|'+r.product;if(!skuMap[k])skuMap[k]={sku:r.sku,name:r.product,tot:0,good:0,bad:0,rw:0};skuMap[k].tot+=r.qty;if(r.status==='Good')skuMap[k].good+=r.qty;else if(r.status==='Bad')skuMap[k].bad+=r.qty;else if(r.status==='Rework')skuMap[k].rw+=r.qty;});
+    BRANDDATA[code]={name,total,good,rework,bad,defectRate:((rework+bad)/total*100).toFixed(1),reasons:Object.entries(reasons).sort((a,b)=>b[1]-a[1]).slice(0,8),skus:Object.values(skuMap).sort((a,b)=>(b.bad+b.rw)-(a.bad+a.rw)).slice(0,10)};
+  });
+}
+
+function renderAll(){renderKPIs();renderBrandCards();renderOverviewCharts();renderBrandAnalysis();renderChannelTable();renderSkuTable();renderSkuCharts();renderTrends();renderHeatmap();}
+function showPanel(id,btn){document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));btn.classList.add('active');document.getElementById(id).classList.add('active');}
+
+function renderKPIs(){
+  const f=filtered();const total=f.reduce((s,r)=>s+r.qty,0)||1;
   const good=f.filter(r=>r.status==='Good').reduce((s,r)=>s+r.qty,0);
   const rework=f.filter(r=>r.status==='Rework').reduce((s,r)=>s+r.qty,0);
   const bad=f.filter(r=>r.status==='Bad').reduce((s,r)=>s+r.qty,0);
   const channels=new Set(f.map(r=>r.channel)).size;
   document.getElementById('kpi-row').innerHTML=`
-    <div class="kpi blue"><div class="kpi-label">Total Units</div><div class="kpi-val">${total.toLocaleString()}</div><div class="kpi-sub">All returns processed</div></div>
+    <div class="kpi blue"><div class="kpi-label">Total Units</div><div class="kpi-val">${total.toLocaleString()}</div><div class="kpi-sub">All QC processed</div></div>
     <div class="kpi green"><div class="kpi-label">OK Units</div><div class="kpi-val">${good.toLocaleString()}</div><div class="kpi-sub">${((good/total)*100).toFixed(1)}% pass rate</div></div>
     <div class="kpi amber"><div class="kpi-label">Rework</div><div class="kpi-val">${rework.toLocaleString()}</div><div class="kpi-sub">${((rework/total)*100).toFixed(1)}% of total</div></div>
     <div class="kpi red"><div class="kpi-label">Bad Units</div><div class="kpi-val">${bad.toLocaleString()}</div><div class="kpi-sub">${((bad/total)*100).toFixed(1)}% rejection</div></div>
@@ -512,88 +346,44 @@ function renderKPIs(){
     <div class="kpi red"><div class="kpi-label">Defect %</div><div class="kpi-val">${((bad/total)*100).toFixed(1)}%</div><div class="kpi-sub">${bad.toLocaleString()} units</div></div>`;
 }
 
-// ─────────────────────────────────────────────
-// BRAND CARDS
-// ─────────────────────────────────────────────
 function renderBrandCards(){
-  const grandTotal=(BRANDDATA.bb.total+BRANDDATA.mm.total+BRANDDATA.lj.total)||1;
+  const gt=(BRANDDATA.bb.total+BRANDDATA.mm.total+BRANDDATA.lj.total)||1;
   document.getElementById('brand-grid').innerHTML=['bb','mm','lj'].map((code,idx)=>{
-    const b=BRANDDATA[code];
-    const classes=['bc-bb','bc-mm','bc-lj'],badges=['badge-bb','badge-mm','badge-lj'],cats=["Personal Care","Men's Health","Baby Care"],labels=['BB','MM','LJ'];
+    const b=BRANDDATA[code];const cls=['bc-bb','bc-mm','bc-lj'],bg=['badge-bb','badge-mm','badge-lj'],cats=["Personal Care","Men's Health","Baby Care"],lbl=['BB','MM','LJ'];
     const gW=(b.good/b.total*100),rW=(b.rework/b.total*100),bW=(b.bad/b.total*100);
-    const dPct=(b.bad/b.total*100).toFixed(1),rwPct=(b.rework/b.total*100).toFixed(1);
-    return`<div class="brand-card ${classes[idx]}">
-      <div class="bc-header"><div><div class="bc-name">${b.name}</div><div class="bc-cat">${cats[idx]}</div></div><div class="bc-badge ${badges[idx]}">${labels[idx]}</div></div>
-      <div class="bc-stats">
-        <div class="bc-stat"><div class="bc-stat-label">Total Units</div><div class="bc-stat-val">${b.total.toLocaleString()}</div><div class="bc-stat-sub">${((b.total/grandTotal)*100).toFixed(1)}% of total</div></div>
-        <div class="bc-stat"><div class="bc-stat-label">Defect Rate</div><div class="bc-stat-val">${b.defectRate}%</div><div class="bc-stat-sub">${(b.rework+b.bad).toLocaleString()} units</div></div>
-      </div>
-      <div class="bc-stats" style="margin-bottom:10px">
-        <div class="bc-stat"><div class="bc-stat-label">Rework %</div><div class="bc-stat-val" style="color:var(--amber)">${rwPct}%</div><div class="bc-stat-sub">${b.rework.toLocaleString()} units</div></div>
-        <div class="bc-stat"><div class="bc-stat-label">Defect % (Bad)</div><div class="bc-stat-val" style="color:var(--red)">${dPct}%</div><div class="bc-stat-sub">${b.bad.toLocaleString()} units</div></div>
-      </div>
-      <div class="bc-bar-wrap"><div class="bc-bar-label"><span>Status Mix</span><span>${b.defectRate}% defects</span></div>
-      <div class="bc-bar"><div class="bc-bar-seg" style="width:${gW}%;background:#10b981"></div><div class="bc-bar-seg" style="width:${rW}%;background:#f59e0b"></div><div class="bc-bar-seg" style="width:${bW}%;background:#ef4444"></div></div></div>
+    const dP=(b.bad/b.total*100).toFixed(1),rP=(b.rework/b.total*100).toFixed(1);
+    return`<div class="brand-card ${cls[idx]}"><div class="bc-header"><div><div class="bc-name">${b.name}</div><div class="bc-cat">${cats[idx]}</div></div><div class="bc-badge ${bg[idx]}">${lbl[idx]}</div></div>
+      <div class="bc-stats"><div class="bc-stat"><div class="bc-stat-label">Total Units</div><div class="bc-stat-val">${b.total.toLocaleString()}</div><div class="bc-stat-sub">${((b.total/gt)*100).toFixed(1)}% of total</div></div><div class="bc-stat"><div class="bc-stat-label">Defect Rate</div><div class="bc-stat-val">${b.defectRate}%</div><div class="bc-stat-sub">${(b.rework+b.bad).toLocaleString()} units</div></div></div>
+      <div class="bc-stats" style="margin-bottom:10px"><div class="bc-stat"><div class="bc-stat-label">Rework %</div><div class="bc-stat-val" style="color:var(--amber)">${rP}%</div><div class="bc-stat-sub">${b.rework.toLocaleString()} units</div></div><div class="bc-stat"><div class="bc-stat-label">Defect % (Bad)</div><div class="bc-stat-val" style="color:var(--red)">${dP}%</div><div class="bc-stat-sub">${b.bad.toLocaleString()} units</div></div></div>
+      <div class="bc-bar-wrap"><div class="bc-bar-label"><span>Status Mix</span><span>${b.defectRate}% defects</span></div><div class="bc-bar"><div class="bc-bar-seg" style="width:${gW}%;background:#10b981"></div><div class="bc-bar-seg" style="width:${rW}%;background:#f59e0b"></div><div class="bc-bar-seg" style="width:${bW}%;background:#ef4444"></div></div></div>
     </div>`;
   }).join('');
 }
 
-// ─────────────────────────────────────────────
-// OVERVIEW CHARTS
-// ─────────────────────────────────────────────
 function renderOverviewCharts(){
   const f=filtered();
-  // Defect donut
   if(CHARTS.defect)CHARTS.defect.destroy();
-  const reasons={};
-  f.filter(r=>r.status!=='Good').forEach(r=>{reasons[r.reason]=(reasons[r.reason]||0)+r.qty;});
+  const reasons={};f.filter(r=>r.status!=='Good').forEach(r=>{reasons[r.reason]=(reasons[r.reason]||0)+r.qty;});
   const sorted=Object.entries(reasons).sort((a,b)=>b[1]-a[1]).slice(0,8);
-  CHARTS.defect=new Chart(document.getElementById('c-defect'),{
-    type:'doughnut',
-    data:{labels:sorted.map(r=>r[0]),datasets:[{data:sorted.map(r=>r[1]),backgroundColor:['#3b82f6','#10b981','#f59e0b','#ef4444','#8b5cf6','#14b8a6','#f97316','#6366f1']}]},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right'},tooltip:{callbacks:{label:ctx=>{const t=sorted.reduce((s,r)=>s+r[1],0);return ctx.label+': '+ctx.parsed.toLocaleString()+' ('+((ctx.parsed/t)*100).toFixed(1)+'%)'}}},datalabels:{color:'#fff',font:{weight:'bold',size:10},formatter:(v,ctx)=>{const t=sorted.reduce((s,r)=>s+r[1],0);return((v/t)*100).toFixed(1)+'%';}}}},
-    plugins:[ChartDataLabels]
-  });
-  // Top 10 channels
+  if(sorted.length){CHARTS.defect=new Chart(document.getElementById('c-defect'),{type:'doughnut',data:{labels:sorted.map(r=>r[0]),datasets:[{data:sorted.map(r=>r[1]),backgroundColor:['#3b82f6','#10b981','#f59e0b','#ef4444','#8b5cf6','#14b8a6','#f97316','#6366f1']}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right'},tooltip:{callbacks:{label:ctx=>{const t=sorted.reduce((s,r)=>s+r[1],0);return ctx.label+': '+ctx.parsed.toLocaleString()+' ('+((ctx.parsed/t)*100).toFixed(1)+'%)'}}},datalabels:{color:'#fff',font:{weight:'bold',size:10},formatter:(v,ctx)=>{const t=sorted.reduce((s,r)=>s+r[1],0);return((v/t)*100).toFixed(1)+'%';}}}},plugins:[ChartDataLabels]});}
   if(CHARTS.channels)CHARTS.channels.destroy();
-  const chMap={};
-  f.forEach(r=>{if(!chMap[r.channel])chMap[r.channel]={tot:0,def:0,rw:0};chMap[r.channel].tot+=r.qty;if(r.status==='Bad')chMap[r.channel].def+=r.qty;if(r.status==='Rework')chMap[r.channel].rw+=r.qty;});
+  const chMap={};f.forEach(r=>{if(!chMap[r.channel])chMap[r.channel]={tot:0,def:0,rw:0};chMap[r.channel].tot+=r.qty;if(r.status==='Bad')chMap[r.channel].def+=r.qty;if(r.status==='Rework')chMap[r.channel].rw+=r.qty;});
   const topCh=Object.entries(chMap).map(([ch,d])=>({ch,defR:d.tot?(d.def/d.tot*100):0,rwR:d.tot?(d.rw/d.tot*100):0,totR:d.tot?((d.def+d.rw)/d.tot*100):0})).sort((a,b)=>b.totR-a.totR).slice(0,10);
-  CHARTS.channels=new Chart(document.getElementById('c-channels'),{
-    type:'bar',
-    data:{labels:topCh.map(c=>c.ch),datasets:[{label:'Defect % (Bad)',data:topCh.map(c=>c.defR.toFixed(1)),backgroundColor:'#ef4444',borderRadius:4},{label:'Rework %',data:topCh.map(c=>c.rwR.toFixed(1)),backgroundColor:'#f59e0b',borderRadius:4}]},
-    options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{position:'top'},tooltip:{callbacks:{label:ctx=>ctx.dataset.label+': '+ctx.parsed.x+'%'}},datalabels:{color:'#fff',font:{weight:'bold',size:9},formatter:v=>v+'%',anchor:'end',align:'start'}},scales:{x:{stacked:false,title:{display:true,text:'Percentage (%)'}}}},
-    plugins:[ChartDataLabels]
-  });
+  if(topCh.length){CHARTS.channels=new Chart(document.getElementById('c-channels'),{type:'bar',data:{labels:topCh.map(c=>c.ch),datasets:[{label:'Defect % (Bad)',data:topCh.map(c=>c.defR.toFixed(1)),backgroundColor:'#ef4444',borderRadius:4},{label:'Rework %',data:topCh.map(c=>c.rwR.toFixed(1)),backgroundColor:'#f59e0b',borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{position:'top'},tooltip:{callbacks:{label:ctx=>ctx.dataset.label+': '+ctx.parsed.x+'%'}},datalabels:{color:'#fff',font:{weight:'bold',size:9},formatter:v=>v+'%',anchor:'end',align:'start'}},scales:{x:{title:{display:true,text:'Percentage (%)'}}}},plugins:[ChartDataLabels]});}
 }
 
-// ─────────────────────────────────────────────
-// BRAND ANALYSIS
-// ─────────────────────────────────────────────
 function renderBrandAnalysis(){
   if(CHARTS.brandComp)CHARTS.brandComp.destroy();
-  CHARTS.brandComp=new Chart(document.getElementById('c-brand-comp'),{
-    type:'bar',
-    data:{labels:['Be Bodywise','Man Matters','Little Joys'],datasets:[{label:'OK',data:[BRANDDATA.bb.good,BRANDDATA.mm.good,BRANDDATA.lj.good],backgroundColor:'#10b981'},{label:'Rework',data:[BRANDDATA.bb.rework,BRANDDATA.mm.rework,BRANDDATA.lj.rework],backgroundColor:'#f59e0b'},{label:'Bad',data:[BRANDDATA.bb.bad,BRANDDATA.mm.bad,BRANDDATA.lj.bad],backgroundColor:'#ef4444'}]},
-    options:{responsive:true,maintainAspectRatio:false,scales:{x:{stacked:true},y:{stacked:true}},plugins:{datalabels:{color:'#fff',font:{weight:'bold',size:10},formatter:v=>v>1000?(v/1000).toFixed(1)+'k':v>0?v:''}}},
-    plugins:[ChartDataLabels]
-  });
+  CHARTS.brandComp=new Chart(document.getElementById('c-brand-comp'),{type:'bar',data:{labels:['Be Bodywise','Man Matters','Little Joys'],datasets:[{label:'OK',data:[BRANDDATA.bb.good,BRANDDATA.mm.good,BRANDDATA.lj.good],backgroundColor:'#10b981'},{label:'Rework',data:[BRANDDATA.bb.rework,BRANDDATA.mm.rework,BRANDDATA.lj.rework],backgroundColor:'#f59e0b'},{label:'Bad',data:[BRANDDATA.bb.bad,BRANDDATA.mm.bad,BRANDDATA.lj.bad],backgroundColor:'#ef4444'}]},options:{responsive:true,maintainAspectRatio:false,scales:{x:{stacked:true},y:{stacked:true}},plugins:{datalabels:{color:'#fff',font:{weight:'bold',size:10},formatter:v=>v>1000?(v/1000).toFixed(1)+'k':v>0?v:'',display:ctx=>ctx.dataset.data[ctx.dataIndex]>0}}},plugins:[ChartDataLabels]});
   const colors=['#3b82f6','#10b981','#f59e0b','#ef4444','#8b5cf6','#14b8a6','#f97316','#6366f1'];
-  document.getElementById('brand-reason-charts').innerHTML=['bb','mm','lj'].map(code=>{
-    const b=BRANDDATA[code],total=b.reasons.reduce((s,r)=>s+r[1],0)||1;
-    return`<div class="card"><div class="card-head"><div class="card-title" style="color:var(--${code})">${b.name} — Return Reasons</div></div><div class="reason-bars">${b.reasons.map((r,i)=>{const pct=(r[1]/total*100).toFixed(1);return`<div class="rb-row"><div class="rb-label">${r[0]}</div><div class="rb-track"><div class="rb-fill" style="width:${pct}%;background:${colors[i]}">${r[1].toLocaleString()}</div></div><div class="rb-pct">${pct}%</div></div>`;}).join('')}</div></div>`;
-  }).join('');
+  document.getElementById('brand-reason-charts').innerHTML=['bb','mm','lj'].map(code=>{const b=BRANDDATA[code],total=b.reasons.reduce((s,r)=>s+r[1],0)||1;return`<div class="card"><div class="card-head"><div class="card-title" style="color:var(--${code})">${b.name} — Return Reasons</div></div><div class="reason-bars">${b.reasons.map((r,i)=>{const pct=(r[1]/total*100).toFixed(1);return`<div class="rb-row"><div class="rb-label">${r[0]}</div><div class="rb-track"><div class="rb-fill" style="width:${pct}%;background:${colors[i]}">${r[1].toLocaleString()}</div></div><div class="rb-pct">${pct}%</div></div>`;}).join('')}</div></div>`;}).join('');
 }
 
-// ─────────────────────────────────────────────
-// CHANNEL TABLE
-// ─────────────────────────────────────────────
 function renderChannelTable(){
   const f=filtered(),chMap={};
   f.forEach(r=>{if(!chMap[r.channel])chMap[r.channel]={good:0,rework:0,bad:0};if(r.status==='Good')chMap[r.channel].good+=r.qty;else if(r.status==='Rework')chMap[r.channel].rework+=r.qty;else if(r.status==='Bad')chMap[r.channel].bad+=r.qty;});
   document.getElementById('channel-tbody').innerHTML=Object.entries(chMap).sort((a,b)=>(b[1].good+b[1].rework+b[1].bad)-(a[1].good+a[1].rework+a[1].bad)).map(([ch,d])=>{
-    const tot=d.good+d.rework+d.bad||1;
-    const defR=((d.bad/tot)*100).toFixed(1),rwR=((d.rework/tot)*100).toFixed(1),totR=((d.rework+d.bad)/tot*100);
+    const tot=d.good+d.rework+d.bad||1;const defR=((d.bad/tot)*100).toFixed(1),rwR=((d.rework/tot)*100).toFixed(1),totR=((d.rework+d.bad)/tot*100);
     const risk=totR>30?'badge-crit':totR>20?'badge-high':totR>10?'badge-med':'badge-low';
     const label=totR>30?'CRITICAL':totR>20?'HIGH':totR>10?'MEDIUM':'OK';
     return`<tr><td>${ch}</td><td class="nm">${tot.toLocaleString()}</td><td class="nm" style="color:var(--green)">${d.good.toLocaleString()}</td><td class="nm" style="color:var(--red)">${d.bad.toLocaleString()}</td><td class="nm" style="color:var(--amber)">${d.rework.toLocaleString()}</td>
@@ -603,12 +393,8 @@ function renderChannelTable(){
   }).join('');
 }
 
-// ─────────────────────────────────────────────
-// SKU TABLE
-// ─────────────────────────────────────────────
 function renderSkuTable(){
-  const bf=document.getElementById('sku-brand-filter').value;
-  let all=[];
+  const bf=document.getElementById('sku-brand-filter').value;let all=[];
   const add=(skus,brand,code)=>skus.forEach((s,i)=>all.push({...s,brand,code,rank:i+1}));
   if(bf==='all'){add(BRANDDATA.bb.skus,'Be Bodywise','bb');add(BRANDDATA.mm.skus,'Man Matters','mm');add(BRANDDATA.lj.skus,'Little Joys','lj');}
   else if(bf==='bb')add(BRANDDATA.bb.skus,'Be Bodywise','bb');
@@ -616,152 +402,61 @@ function renderSkuTable(){
   else if(bf==='lj')add(BRANDDATA.lj.skus,'Little Joys','lj');
   const colors={bb:'#6366f1',mm:'#f97316',lj:'#14b8a6'};
   document.getElementById('sku-tbody').innerHTML=all.map(s=>{
-    const tot=s.tot||1,dPct=(s.bad/tot*100).toFixed(1),rwPct=(s.rw/tot*100).toFixed(1),tD=((s.bad+s.rw)/tot*100).toFixed(1);
+    const tot=s.tot||1,dP=(s.bad/tot*100).toFixed(1),rP=(s.rw/tot*100).toFixed(1),tD=((s.bad+s.rw)/tot*100).toFixed(1);
     const bc=tD>70?'badge-crit':tD>50?'badge-high':tD>25?'badge-med':'badge-low';
     const rl=tD>70?'CRITICAL':tD>50?'HIGH':tD>25?'MEDIUM':'OK';
-    return`<tr><td class="nm" style="font-weight:700;color:var(--t3)">#${s.rank}</td>
-      <td><span style="display:inline-block;width:6px;height:6px;border-radius:2px;background:${colors[s.code]};margin-right:6px;vertical-align:middle"></span><span style="font-size:10px;color:var(--t2)">${s.brand.split(' ')[0]}</span></td>
-      <td class="nm" style="font-size:10px;color:var(--t3)">${s.sku}</td><td style="font-size:11px;max-width:260px">${s.name}</td>
-      <td class="nm">${s.tot.toLocaleString()}</td><td class="nm" style="color:var(--green)">${s.good.toLocaleString()}</td><td class="nm" style="color:var(--red)">${s.bad.toLocaleString()}</td><td class="nm" style="color:var(--amber)">${s.rw.toLocaleString()}</td>
-      <td><div class="mini-bar-wrap"><div class="mini-bar"><div class="mini-fill" style="width:${Math.min(100,s.bad/tot*100)}%;background:var(--red)"></div></div><span class="nm">${dPct}%</span></div></td>
-      <td><div class="mini-bar-wrap"><div class="mini-bar"><div class="mini-fill" style="width:${Math.min(100,s.rw/tot*100)}%;background:var(--amber)"></div></div><span class="nm">${rwPct}%</span></div></td>
-      <td><span class="badge ${bc}">${rl}</span></td></tr>`;
+    return`<tr><td class="nm" style="font-weight:700;color:var(--t3)">#${s.rank}</td><td><span style="display:inline-block;width:6px;height:6px;border-radius:2px;background:${colors[s.code]};margin-right:6px;vertical-align:middle"></span><span style="font-size:10px;color:var(--t2)">${s.brand.split(' ')[0]}</span></td><td class="nm" style="font-size:10px;color:var(--t3)">${s.sku}</td><td style="font-size:11px;max-width:260px">${s.name}</td><td class="nm">${s.tot.toLocaleString()}</td><td class="nm" style="color:var(--green)">${s.good.toLocaleString()}</td><td class="nm" style="color:var(--red)">${s.bad.toLocaleString()}</td><td class="nm" style="color:var(--amber)">${s.rw.toLocaleString()}</td><td><div class="mini-bar-wrap"><div class="mini-bar"><div class="mini-fill" style="width:${Math.min(100,s.bad/tot*100)}%;background:var(--red)"></div></div><span class="nm">${dP}%</span></div></td><td><div class="mini-bar-wrap"><div class="mini-bar"><div class="mini-fill" style="width:${Math.min(100,s.rw/tot*100)}%;background:var(--amber)"></div></div><span class="nm">${rP}%</span></div></td><td><span class="badge ${bc}">${rl}</span></td></tr>`;
   }).join('');
 }
 
-// ─────────────────────────────────────────────
-// SKU CHARTS
-// ─────────────────────────────────────────────
 function renderSkuCharts(){
-  ['mm','lj'].forEach(code=>{
-    const key='sku'+code.toUpperCase();
-    if(CHARTS[key])CHARTS[key].destroy();
-    const skus=BRANDDATA[code].skus.slice(0,6);
-    if(!skus.length)return;
-    CHARTS[key]=new Chart(document.getElementById('c-sku-'+code),{
-      type:'bar',
-      data:{labels:skus.map((s,i)=>`#${i+1} ${s.name.substring(0,22)}`),datasets:[{label:'Bad %',data:skus.map(s=>s.tot?(s.bad/s.tot*100).toFixed(1):0),backgroundColor:'rgba(239,68,68,.85)',borderRadius:3},{label:'Rework %',data:skus.map(s=>s.tot?(s.rw/s.tot*100).toFixed(1):0),backgroundColor:'rgba(245,158,11,.85)',borderRadius:3}]},
-      options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{boxWidth:8,font:{size:10}}},tooltip:{callbacks:{label:ctx=>ctx.dataset.label+': '+ctx.parsed.x+'%'}}},scales:{x:{max:100,ticks:{callback:v=>v+'%'}},y:{ticks:{font:{size:10}}}}}
-    });
-  });
+  ['mm','lj'].forEach(code=>{const key='sku'+code.toUpperCase();if(CHARTS[key])CHARTS[key].destroy();const skus=BRANDDATA[code].skus.slice(0,6);if(!skus.length)return;CHARTS[key]=new Chart(document.getElementById('c-sku-'+code),{type:'bar',data:{labels:skus.map((s,i)=>`#${i+1} ${s.name.substring(0,22)}`),datasets:[{label:'Bad %',data:skus.map(s=>s.tot?(s.bad/s.tot*100).toFixed(1):0),backgroundColor:'rgba(239,68,68,.85)',borderRadius:3},{label:'Rework %',data:skus.map(s=>s.tot?(s.rw/s.tot*100).toFixed(1):0),backgroundColor:'rgba(245,158,11,.85)',borderRadius:3}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{boxWidth:8,font:{size:10}}},tooltip:{callbacks:{label:ctx=>ctx.dataset.label+': '+ctx.parsed.x+'%'}}},scales:{x:{max:100,ticks:{callback:v=>v+'%'}},y:{ticks:{font:{size:10}}}}}});});
 }
 
-// ─────────────────────────────────────────────
-// TRENDS — uses ALL months present in data
-// ─────────────────────────────────────────────
 function renderTrends(){
-  // Build monthly data using AVAILABLE_MONTHS (dynamic from data)
-  const mData={};
-  AVAILABLE_MONTHS.forEach(m=>mData[m]={bb:{tot:0,def:0,rw:0},mm:{tot:0,def:0,rw:0},lj:{tot:0,def:0,rw:0}});
-  RAW_DATA.forEach(r=>{
-    if(!mData[r.month])return;
-    const c=r.brand==='Be Bodywise'?'bb':r.brand==='Man Matters'?'mm':'lj';
-    mData[r.month][c].tot+=r.qty;
-    if(r.status==='Bad')mData[r.month][c].def+=r.qty;
-    if(r.status==='Rework')mData[r.month][c].rw+=r.qty;
-  });
+  const mData={};AVAILABLE_MONTHS.forEach(m=>mData[m]={bb:{tot:0,def:0,rw:0},mm:{tot:0,def:0,rw:0},lj:{tot:0,def:0,rw:0}});
+  RAW_DATA.forEach(r=>{if(!mData[r.month])return;const c=r.brand==='Be Bodywise'?'bb':r.brand==='Man Matters'?'mm':'lj';mData[r.month][c].tot+=r.qty;if(r.status==='Bad')mData[r.month][c].def+=r.qty;if(r.status==='Rework')mData[r.month][c].rw+=r.qty;});
   const labels=AVAILABLE_MONTHS;
-
-  // Defect & Rework Rate Trends
   if(CHARTS.trendDR)CHARTS.trendDR.destroy();
-  CHARTS.trendDR=new Chart(document.getElementById('c-trend-dr'),{
-    type:'line',
-    data:{labels,datasets:[
-      {label:'BB - Defect %',data:labels.map(m=>mData[m].bb.tot?(mData[m].bb.def/mData[m].bb.tot*100).toFixed(1):null),borderColor:'#6366f1',backgroundColor:'#6366f1',tension:0.4,fill:false,pointRadius:6,borderWidth:2.5},
-      {label:'BB - Rework %',data:labels.map(m=>mData[m].bb.tot?(mData[m].bb.rw/mData[m].bb.tot*100).toFixed(1):null),borderColor:'#6366f1',backgroundColor:'#6366f1',tension:0.4,fill:false,pointRadius:4,borderWidth:1.5,borderDash:[5,5]},
-      {label:'MM - Defect %',data:labels.map(m=>mData[m].mm.tot?(mData[m].mm.def/mData[m].mm.tot*100).toFixed(1):null),borderColor:'#f97316',backgroundColor:'#f97316',tension:0.4,fill:false,pointRadius:6,borderWidth:2.5},
-      {label:'MM - Rework %',data:labels.map(m=>mData[m].mm.tot?(mData[m].mm.rw/mData[m].mm.tot*100).toFixed(1):null),borderColor:'#f97316',backgroundColor:'#f97316',tension:0.4,fill:false,pointRadius:4,borderWidth:1.5,borderDash:[5,5]},
-      {label:'LJ - Defect %',data:labels.map(m=>mData[m].lj.tot?(mData[m].lj.def/mData[m].lj.tot*100).toFixed(1):null),borderColor:'#14b8a6',backgroundColor:'#14b8a6',tension:0.4,fill:false,pointRadius:6,borderWidth:2.5},
-      {label:'LJ - Rework %',data:labels.map(m=>mData[m].lj.tot?(mData[m].lj.rw/mData[m].lj.tot*100).toFixed(1):null),borderColor:'#14b8a6',backgroundColor:'#14b8a6',tension:0.4,fill:false,pointRadius:4,borderWidth:1.5,borderDash:[5,5]}
-    ]},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{boxWidth:12,font:{size:10}}},tooltip:{callbacks:{label:ctx=>ctx.dataset.label+': '+ctx.parsed.y+'%'}}},scales:{y:{beginAtZero:true,title:{display:true,text:'%'}}}}
-  });
-
-  // Volume stacked bar
+  CHARTS.trendDR=new Chart(document.getElementById('c-trend-dr'),{type:'line',data:{labels,datasets:[{label:'BB - Defect %',data:labels.map(m=>mData[m].bb.tot?(mData[m].bb.def/mData[m].bb.tot*100).toFixed(1):null),borderColor:'#6366f1',backgroundColor:'#6366f1',tension:0.4,fill:false,pointRadius:6,borderWidth:2.5},{label:'BB - Rework %',data:labels.map(m=>mData[m].bb.tot?(mData[m].bb.rw/mData[m].bb.tot*100).toFixed(1):null),borderColor:'#6366f1',backgroundColor:'#6366f1',tension:0.4,fill:false,pointRadius:4,borderWidth:1.5,borderDash:[5,5]},{label:'MM - Defect %',data:labels.map(m=>mData[m].mm.tot?(mData[m].mm.def/mData[m].mm.tot*100).toFixed(1):null),borderColor:'#f97316',backgroundColor:'#f97316',tension:0.4,fill:false,pointRadius:6,borderWidth:2.5},{label:'MM - Rework %',data:labels.map(m=>mData[m].mm.tot?(mData[m].mm.rw/mData[m].mm.tot*100).toFixed(1):null),borderColor:'#f97316',backgroundColor:'#f97316',tension:0.4,fill:false,pointRadius:4,borderWidth:1.5,borderDash:[5,5]},{label:'LJ - Defect %',data:labels.map(m=>mData[m].lj.tot?(mData[m].lj.def/mData[m].lj.tot*100).toFixed(1):null),borderColor:'#14b8a6',backgroundColor:'#14b8a6',tension:0.4,fill:false,pointRadius:6,borderWidth:2.5},{label:'LJ - Rework %',data:labels.map(m=>mData[m].lj.tot?(mData[m].lj.rw/mData[m].lj.tot*100).toFixed(1):null),borderColor:'#14b8a6',backgroundColor:'#14b8a6',tension:0.4,fill:false,pointRadius:4,borderWidth:1.5,borderDash:[5,5]}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{boxWidth:12,font:{size:10}}},tooltip:{callbacks:{label:ctx=>ctx.dataset.label+': '+ctx.parsed.y+'%'}}},scales:{y:{beginAtZero:true,title:{display:true,text:'%'}}}}});
   if(CHARTS.trendVol)CHARTS.trendVol.destroy();
-  CHARTS.trendVol=new Chart(document.getElementById('c-trend-vol'),{
-    type:'bar',
-    data:{labels,datasets:[{label:'Be Bodywise',data:labels.map(m=>mData[m].bb.tot),backgroundColor:'#6366f1'},{label:'Man Matters',data:labels.map(m=>mData[m].mm.tot),backgroundColor:'#f97316'},{label:'Little Joys',data:labels.map(m=>mData[m].lj.tot),backgroundColor:'#14b8a6'}]},
-    options:{responsive:true,maintainAspectRatio:false,scales:{x:{stacked:true},y:{stacked:true}},plugins:{datalabels:{color:'#fff',font:{weight:'bold',size:10},formatter:(v,ctx)=>{const t=[mData[labels[ctx.dataIndex]].bb.tot,mData[labels[ctx.dataIndex]].mm.tot,mData[labels[ctx.dataIndex]].lj.tot].reduce((a,b)=>a+b,0);return t?((v/t)*100).toFixed(0)+'%':'';}}}},
-    plugins:[ChartDataLabels]
-  });
-
-  // Category trend
+  const volData={};AVAILABLE_MONTHS.forEach(m=>volData[m]={bb:0,mm:0,lj:0});
+  RAW_DATA.forEach(r=>{if(!volData[r.month])return;const c=r.brand==='Be Bodywise'?'bb':r.brand==='Man Matters'?'mm':'lj';volData[r.month][c]+=r.qty;});
+  CHARTS.trendVol=new Chart(document.getElementById('c-trend-vol'),{type:'bar',data:{labels,datasets:[{label:'Be Bodywise',data:labels.map(m=>volData[m].bb),backgroundColor:'#6366f1'},{label:'Man Matters',data:labels.map(m=>volData[m].mm),backgroundColor:'#f97316'},{label:'Little Joys',data:labels.map(m=>volData[m].lj),backgroundColor:'#14b8a6'}]},options:{responsive:true,maintainAspectRatio:false,scales:{x:{stacked:true},y:{stacked:true}},plugins:{datalabels:{color:'#fff',font:{weight:'bold',size:10},formatter:(v,ctx)=>{const t=[volData[labels[ctx.dataIndex]].bb,volData[labels[ctx.dataIndex]].mm,volData[labels[ctx.dataIndex]].lj].reduce((a,b)=>a+b,0);return t&&v>0?((v/t)*100).toFixed(0)+'%':'';},display:ctx=>ctx.dataset.data[ctx.dataIndex]>0}}},plugins:[ChartDataLabels]});
   if(CHARTS.trendCat)CHARTS.trendCat.destroy();
   const catData={};AVAILABLE_MONTHS.forEach(m=>catData[m]={good:0,rework:0,bad:0});
   RAW_DATA.forEach(r=>{if(!catData[r.month])return;if(r.status==='Good')catData[r.month].good+=r.qty;else if(r.status==='Rework')catData[r.month].rework+=r.qty;else if(r.status==='Bad')catData[r.month].bad+=r.qty;});
-  CHARTS.trendCat=new Chart(document.getElementById('c-trend-cat'),{
-    type:'line',
-    data:{labels,datasets:[{label:'Good',data:labels.map(m=>catData[m].good),borderColor:'#10b981',backgroundColor:'rgba(16,185,129,.15)',fill:true,tension:0.4,borderWidth:2},{label:'Rework',data:labels.map(m=>catData[m].rework),borderColor:'#f59e0b',backgroundColor:'rgba(245,158,11,.15)',fill:true,tension:0.4,borderWidth:2},{label:'Bad',data:labels.map(m=>catData[m].bad),borderColor:'#ef4444',backgroundColor:'rgba(239,68,68,.15)',fill:true,tension:0.4,borderWidth:2}]},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{tooltip:{callbacks:{label:ctx=>{const t=catData[labels[ctx.dataIndex]];const tot=t.good+t.rework+t.bad;return ctx.dataset.label+': '+ctx.parsed.y.toLocaleString()+' ('+((ctx.parsed.y/tot)*100).toFixed(1)+'%)'}}}}}
-  });
-
-  // Channel trend
+  CHARTS.trendCat=new Chart(document.getElementById('c-trend-cat'),{type:'line',data:{labels,datasets:[{label:'Good',data:labels.map(m=>catData[m].good),borderColor:'#10b981',backgroundColor:'rgba(16,185,129,.15)',fill:true,tension:0.4,borderWidth:2},{label:'Rework',data:labels.map(m=>catData[m].rework),borderColor:'#f59e0b',backgroundColor:'rgba(245,158,11,.15)',fill:true,tension:0.4,borderWidth:2},{label:'Bad',data:labels.map(m=>catData[m].bad),borderColor:'#ef4444',backgroundColor:'rgba(239,68,68,.15)',fill:true,tension:0.4,borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{tooltip:{callbacks:{label:ctx=>{const t=catData[labels[ctx.dataIndex]];const tot=t.good+t.rework+t.bad;return ctx.dataset.label+': '+ctx.parsed.y.toLocaleString()+' ('+((ctx.parsed.y/tot)*100).toFixed(1)+'%)'}}}}}});
   if(CHARTS.channelTrend)CHARTS.channelTrend.destroy();
   const chVol={};RAW_DATA.forEach(r=>{chVol[r.channel]=(chVol[r.channel]||0)+r.qty;});
   const top5=Object.entries(chVol).sort((a,b)=>b[1]-a[1]).slice(0,5).map(c=>c[0]);
   const chM={};top5.forEach(ch=>{chM[ch]={};AVAILABLE_MONTHS.forEach(m=>chM[ch][m]={good:0,bad:0,rework:0,total:0});});
   RAW_DATA.forEach(r=>{if(!top5.includes(r.channel)||!chM[r.channel][r.month])return;chM[r.channel][r.month].total+=r.qty;if(r.status==='Good')chM[r.channel][r.month].good+=r.qty;else if(r.status==='Bad')chM[r.channel][r.month].bad+=r.qty;else if(r.status==='Rework')chM[r.channel][r.month].rework+=r.qty;});
-  const colors=['#3b82f6','#10b981','#f59e0b','#ef4444','#8b5cf6'];
-  const datasets=[];
-  top5.forEach((ch,i)=>{
-    const pct=(key)=>labels.map(m=>{const d=chM[ch][m];return d.total?((d[key]/d.total)*100).toFixed(1):null;});
-    datasets.push({label:ch+' - Good%',data:pct('good'),borderColor:colors[i],backgroundColor:colors[i],tension:0.4,fill:false,borderWidth:2,pointRadius:3});
-    datasets.push({label:ch+' - Bad%',data:pct('bad'),borderColor:colors[i],backgroundColor:colors[i],tension:0.4,fill:false,borderWidth:1.5,borderDash:[5,5],pointRadius:2});
-    datasets.push({label:ch+' - Rework%',data:pct('rework'),borderColor:colors[i],backgroundColor:colors[i],tension:0.4,fill:false,borderWidth:1,borderDash:[2,2],pointRadius:2});
-  });
-  CHARTS.channelTrend=new Chart(document.getElementById('c-channel-trend'),{
-    type:'line',data:{labels,datasets},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{boxWidth:8,font:{size:9}}},tooltip:{callbacks:{label:ctx=>ctx.dataset.label+': '+ctx.parsed.y+'%'}}},scales:{y:{beginAtZero:true,max:100,title:{display:true,text:'%'}}}}
-  });
+  const colors=['#3b82f6','#10b981','#f59e0b','#ef4444','#8b5cf6'];const datasets=[];
+  top5.forEach((ch,i)=>{const pct=(key)=>labels.map(m=>{const d=chM[ch][m];return d.total?((d[key]/d.total)*100).toFixed(1):null;});datasets.push({label:ch+' - Good%',data:pct('good'),borderColor:colors[i],backgroundColor:colors[i],tension:0.4,fill:false,borderWidth:2,pointRadius:3});datasets.push({label:ch+' - Bad%',data:pct('bad'),borderColor:colors[i],backgroundColor:colors[i],tension:0.4,fill:false,borderWidth:1.5,borderDash:[5,5],pointRadius:2});datasets.push({label:ch+' - Rework%',data:pct('rework'),borderColor:colors[i],backgroundColor:colors[i],tension:0.4,fill:false,borderWidth:1,borderDash:[2,2],pointRadius:2});});
+  CHARTS.channelTrend=new Chart(document.getElementById('c-channel-trend'),{type:'line',data:{labels,datasets},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{boxWidth:8,font:{size:9}}},tooltip:{callbacks:{label:ctx=>ctx.dataset.label+': '+ctx.parsed.y+'%'}}},scales:{y:{beginAtZero:true,max:100,title:{display:true,text:'%'}}}}});
 }
 
-// ─────────────────────────────────────────────
-// HEATMAP
-// ─────────────────────────────────────────────
 function renderHeatmap(){
-  const f=filtered(),chVol={};
-  f.forEach(r=>{chVol[r.channel]=(chVol[r.channel]||0)+r.qty;});
+  const f=filtered(),chVol={};f.forEach(r=>{chVol[r.channel]=(chVol[r.channel]||0)+r.qty;});
   const top20=Object.entries(chVol).sort((a,b)=>b[1]-a[1]).slice(0,20).map(c=>c[0]);
-  const dTypes={};
-  f.filter(r=>r.status!=='Good').forEach(r=>{dTypes[r.reason]=(dTypes[r.reason]||0)+r.qty;});
+  const dTypes={};f.filter(r=>r.status!=='Good').forEach(r=>{dTypes[r.reason]=(dTypes[r.reason]||0)+r.qty;});
   const topDef=Object.keys(dTypes).sort((a,b)=>dTypes[b]-dTypes[a]).slice(0,8);
   const hm={};top20.forEach(ch=>{hm[ch]={};topDef.forEach(d=>hm[ch][d]=0);});
   f.forEach(r=>{if(top20.includes(r.channel)&&topDef.includes(r.reason)&&r.status!=='Good')hm[r.channel][r.reason]+=r.qty;});
   let maxVal=0;Object.values(hm).forEach(row=>Object.values(row).forEach(v=>{if(v>maxVal)maxVal=v;}));
   const gc=v=>{if(!v)return'#f4f5f8';const i=v/maxVal;if(i>.7)return'#dc2626';if(i>.5)return'#ef4444';if(i>.3)return'#f97316';if(i>.15)return'#f59e0b';return'#fbbf24';};
-  document.getElementById('heatmap-container').innerHTML=`
-    <div class="hm-header"><div class="hm-label">Channel</div>${topDef.map(d=>`<div class="hm-label">${d.substring(0,11)}</div>`).join('')}</div>
-    <div class="heatmap-grid">${top20.map(ch=>`<div class="hm-row"><div class="hm-ch">${ch}</div>${topDef.map(d=>{const v=hm[ch][d];return`<div class="hm-cell" style="background:${gc(v)};color:${v>maxVal*.5?'white':'var(--t1)'}" title="${ch} · ${d}: ${v}">${v||''}</div>`;}).join('')}</div>`).join('')}</div>`;
+  document.getElementById('heatmap-container').innerHTML=`<div class="hm-header"><div class="hm-label">Channel</div>${topDef.map(d=>`<div class="hm-label">${d.substring(0,11)}</div>`).join('')}</div><div class="heatmap-grid">${top20.map(ch=>`<div class="hm-row"><div class="hm-ch">${ch}</div>${topDef.map(d=>{const v=hm[ch][d];return`<div class="hm-cell" style="background:${gc(v)};color:${v>maxVal*.5?'white':'var(--t1)'}" title="${ch} · ${d}: ${v}">${v||''}</div>`;}).join('')}</div>`).join('')}</div>`;
 }
 
-// ─────────────────────────────────────────────
-// TABLE SORT
-// ─────────────────────────────────────────────
 let sortDir={};
-function sortTable(tbodyId,col){
-  const tbody=document.getElementById(tbodyId),rows=Array.from(tbody.querySelectorAll('tr'));
-  sortDir[col]=!sortDir[col];
-  rows.sort((a,b)=>{const av=a.cells[col].textContent.trim(),bv=b.cells[col].textContent.trim();const an=parseFloat(av.replace(/[^\d.-]/g,'')),bn=parseFloat(bv.replace(/[^\d.-]/g,''));const cmp=isNaN(an)?av.localeCompare(bv):an-bn;return sortDir[col]?cmp:-cmp;});
-  rows.forEach(r=>tbody.appendChild(r));
-}
+function sortTable(tbodyId,col){const tbody=document.getElementById(tbodyId),rows=Array.from(tbody.querySelectorAll('tr'));sortDir[col]=!sortDir[col];rows.sort((a,b)=>{const av=a.cells[col].textContent.trim(),bv=b.cells[col].textContent.trim();const an=parseFloat(av.replace(/[^\d.-]/g,'')),bn=parseFloat(bv.replace(/[^\d.-]/g,''));const cmp=isNaN(an)?av.localeCompare(bv):an-bn;return sortDir[col]?cmp:-cmp;});rows.forEach(r=>tbody.appendChild(r));}
 
-// ─────────────────────────────────────────────
-// SAMPLE DATA FALLBACK
-// ─────────────────────────────────────────────
 function sampleData(){
-  const ch=['Amazon','Flipkart','Myntra','Nykaa','Purplle','Blinkit','Tata 1mg','PharmEasy'],st=['Good','Rework','Bad'],rs=['Rate Sticker','Damaged','Near Expiry','Missing Items','Packaging Issue'];
-  const data=[];
-  for(let i=0;i<5000;i++){
-    const b=['Be Bodywise','Man Matters','Little Joys'][i%3];
-    data.push({month:['January','February','March','April','May'][i%5],channel:ch[i%ch.length],brand:b,sku:b.substring(0,2).toUpperCase()+(10000+i),product:b+' Product '+(i%10),qty:Math.floor(Math.random()*30)+1,status:st[Math.floor(Math.random()*3)],reason:rs[Math.floor(Math.random()*rs.length)]});
-  }
-  return data;
+  const ch=['Amazon','Flipkart','Myntra','Nykaa','Purplle','Blinkit'],st=['Good','Rework','Bad'],rs=['Rate Sticker','Box Damaged','Near Expiry','Missing Items'];
+  const data=[];for(let i=0;i<5000;i++){const b=['Be Bodywise','Man Matters','Little Joys'][i%3];data.push({month:['January','February','March','April','May'][i%5],channel:ch[i%ch.length],brand:b,sku:b.substring(0,2).toUpperCase()+(10000+i),product:b+' Product '+(i%10),qty:Math.floor(Math.random()*30)+1,status:st[Math.floor(Math.random()*3)],reason:rs[Math.floor(Math.random()*rs.length)]});}return data;
 }
 
-// ─────────────────────────────────────────────
-// START
-// ─────────────────────────────────────────────
 init();
 </script>
 </body>
