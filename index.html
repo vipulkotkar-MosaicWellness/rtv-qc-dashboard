@@ -151,7 +151,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--t1);min-height:100
   <div class="kpi-row" id="kpi-row"></div>
   <div class="brand-grid" id="brand-grid"></div>
   <div class="grid-2">
-    <div class="card"><div class="card-head"><div><div class="card-title">Defect Breakdown by Category</div><div class="card-sub">Breakdown of rejection reasons</div></div></div><div class="chart-wrap"><canvas id="c-defect"></canvas></div></div>
+    <div class="card"><div class="card-head"><div><div class="card-title">Defect Breakdown by Category</div><div class="card-sub">Rejection reasons</div></div></div><div class="chart-wrap"><canvas id="c-defect"></canvas></div></div>
     <div class="card"><div class="card-head"><div><div class="card-title">Top 10 High-Risk Channels</div><div class="card-sub">Highest defect % and rework %</div></div></div><div class="chart-wrap" style="height:350px"><canvas id="c-channels"></canvas></div></div>
   </div>
 </div>
@@ -163,23 +163,23 @@ body{font-family:var(--font);background:var(--bg);color:var(--t1);min-height:100
     <div class="card"><div class="card-head"><div class="card-title">Monthly Volume Breakdown</div></div><div class="chart-wrap"><canvas id="c-trend-vol"></canvas></div></div>
     <div class="card"><div class="card-head"><div class="card-title">Category Trends Over Time</div></div><div class="chart-wrap"><canvas id="c-trend-cat"></canvas></div></div>
   </div>
-  <div class="card"><div class="card-head"><div class="card-title">Monthly Defect Rate & Rework Rate Trends (by Brand)</div></div><div class="chart-wrap"><canvas id="c-trend-dr"></canvas></div></div>
-  <div class="card"><div class="card-head"><div class="card-title">Channel-wise Return Trends — Good / Bad / Rework %</div></div><div class="chart-wrap"><canvas id="c-channel-trend"></canvas></div></div>
+  <div class="card"><div class="card-head"><div class="card-title">Monthly Defect & Rework Rate Trends (by Brand)</div></div><div class="chart-wrap"><canvas id="c-trend-dr"></canvas></div></div>
+  <div class="card"><div class="card-head"><div class="card-title">Channel-wise Return Trends</div></div><div class="chart-wrap"><canvas id="c-channel-trend"></canvas></div></div>
 </div>
 <div class="panel" id="channels">
-  <div class="card"><div class="card-head"><div class="card-title">Channel Performance — All Returns</div></div>
+  <div class="card"><div class="card-head"><div class="card-title">Channel Performance</div></div>
     <div class="table-container table-wrap"><table class="data-table"><thead><tr>
-      <th onclick="sortTable('channel-tbody',0)">Channel</th><th onclick="sortTable('channel-tbody',1)">Total</th><th onclick="sortTable('channel-tbody',2)">Good</th><th onclick="sortTable('channel-tbody',3)">Bad</th><th onclick="sortTable('channel-tbody',4)">Rework</th><th onclick="sortTable('channel-tbody',5)">Defect %</th><th onclick="sortTable('channel-tbody',6)">Rework %</th><th onclick="sortTable('channel-tbody',7)">Risk</th>
-    </tr></thead><tbody id="channel-tbody"></tbody></table></div>
+      <th onclick="sortTable('ch-tbody',0)">Channel</th><th onclick="sortTable('ch-tbody',1)">Total</th><th onclick="sortTable('ch-tbody',2)">Good</th><th onclick="sortTable('ch-tbody',3)">Bad</th><th onclick="sortTable('ch-tbody',4)">Rework</th><th onclick="sortTable('ch-tbody',5)">Defect %</th><th onclick="sortTable('ch-tbody',6)">Rework %</th><th onclick="sortTable('ch-tbody',7)">Risk</th>
+    </tr></thead><tbody id="ch-tbody"></tbody></table></div>
   </div>
 </div>
 <div class="panel" id="skus">
   <div class="card">
     <div class="card-head">
-      <div><div class="card-title">Top 10 Critical SKUs by Brand</div><div class="card-sub">Ranked by highest Rework + Bad count (worst first)</div></div>
+      <div><div class="card-title">Top 10 Critical SKUs by Brand</div><div class="card-sub">Ranked by Rework + Bad count</div></div>
       <div class="controls"><select class="select-ctrl" id="sku-brand-filter" onchange="renderSkuTable()"><option value="all">All Brands</option><option value="bb">Be Bodywise</option><option value="mm">Man Matters</option><option value="lj">Little Joys</option></select></div>
     </div>
-    <div class="table-container table-wrap"><table class="data-table"><thead><tr><th>Rank</th><th>Brand</th><th>SKU</th><th>Product Name</th><th>Total</th><th>Good</th><th>Bad</th><th>Rework</th><th>Defect %</th><th>Rework %</th><th>Risk</th></tr></thead><tbody id="sku-tbody"></tbody></table></div>
+    <div class="table-container table-wrap"><table class="data-table"><thead><tr><th>Rank</th><th>Brand</th><th>SKU</th><th>Product</th><th>Total</th><th>Good</th><th>Bad</th><th>Rework</th><th>Defect %</th><th>Rework %</th><th>Risk</th></tr></thead><tbody id="sku-tbody"></tbody></table></div>
   </div>
   <div class="grid-2">
     <div class="card"><div class="card-head"><div class="card-title" style="color:var(--mm)">Man Matters — Critical SKUs</div></div><div class="chart-wrap" style="height:240px"><canvas id="c-sku-mm"></canvas></div></div>
@@ -187,26 +187,21 @@ body{font-family:var(--font);background:var(--bg);color:var(--t1);min-height:100
   </div>
 </div>
 <div class="panel" id="heatmap">
-  <div class="card"><div class="card-head"><div class="card-title">Defect Type Heatmap — Top 20 Channels × Top 8 Defect Types</div></div><div id="heatmap-container"></div></div>
+  <div class="card"><div class="card-head"><div class="card-title">Defect Heatmap — Top 20 Channels × Top 8 Defect Types</div></div><div id="heatmap-container"></div></div>
 </div>
 </div>
+
 <script>
 const CSV_URL='https://docs.google.com/spreadsheets/d/e/2PACX-1vSismHdOKJigedmrPENc8HXyW4TvqHek7e1ASCluZfi1s3jgQPZGhYJQjb_F5IoarAnOmybH7aIqrWG/pub?gid=1227720756&single=true&output=csv';
 const AUTO_REFRESH_SECONDS=300;
 const MONTH_ORDER=['January','February','March','April','May','June','July','August','September','October','November','December'];
 
-// ── VERIFIED COLUMN INDICES FROM ACTUAL CSV ANALYSIS ──────────────
-// Col B [idx 1]  = Month text (April26, March26, May26) → month name
-// Col E [idx 4]  = Channel Name
-// Col L [idx 11] = SKU
-// Col M [idx 12] = Product Name
-// Col N [idx 13] = Qty
-// Col S [idx 18] = Status (Good / Bad / Rework)  ← CORRECT (NOT idx 19!)
-// Col T [idx 19] = Rejection Reason               ← CORRECT (NOT Status!)
-const COL_MONTH=1, COL_CHANNEL=4, COL_SKU=11, COL_PRODUCT=12, COL_QTY=13, COL_STATUS=18, COL_REASON=19;
-
 let RAW_DATA=[], CURRENT_MONTH='all', AVAILABLE_MONTHS=[], BRANDDATA={bb:{},mm:{},lj:{}}, CHARTS={};
 let countdownSeconds=AUTO_REFRESH_SECONDS, countdownInterval=null;
+
+// ── DYNAMIC COLUMN INDICES (detected from CSV header row) ──────────
+// Never hardcoded — found by searching header names
+let COL={month:-1,channel:-1,sku:-1,product:-1,qty:-1,status:-1,reason:-1};
 
 async function init(){showLoading(true);await loadData();processData();buildMonthFilters();renderAll();showLoading(false);startAutoRefresh();}
 function showLoading(s){document.getElementById('loading-overlay').classList.toggle('show',s);}
@@ -224,40 +219,93 @@ async function loadData(){
   }catch(err){
     console.warn('Fetch failed:',err);
     if(RAW_DATA.length===0){RAW_DATA=sampleData();AVAILABLE_MONTHS=MONTH_ORDER.slice(0,5);}
-    document.getElementById('data-source-label').textContent='⚠️ Using cached/sample data — Google Sheets temporarily unavailable';
+    document.getElementById('data-source-label').textContent='⚠️ Using cached/sample data — Google Sheets unavailable';
   }
 }
 
+// ── CSV PARSER — dynamically detects columns from header row ────────
 function parseCSV(text){
   const lines=text.split('\n').filter(l=>l.trim());
   if(lines.length<2)return[];
-  const headers=parseCSVLine(lines[0]);
-  console.log(`COLUMN MAP — Month[${COL_MONTH}]="${headers[COL_MONTH]}" | Status[${COL_STATUS}]="${headers[COL_STATUS]}" | Reason[${COL_REASON}]="${headers[COL_REASON]}" | Qty[${COL_QTY}]="${headers[COL_QTY]}"`);
+
+  const headers=parseCSVLine(lines[0]).map(h=>h.replace(/"/g,'').trim().toLowerCase());
+
+  // ── Find columns by header name (case-insensitive) ──────────────
+  // Status: find first column containing 'status' that isn't a second/done column
+  COL.month   = findCol(headers,['month']);
+  COL.channel = findCol(headers,['channel name','channel']);
+  COL.sku     = findCol(headers,['sku','ean']);
+  COL.product = findCol(headers,['prod','product name','product']);
+  COL.qty     = findCol(headers,['qty','quantity']);
+  COL.status  = findCol(headers,['status']);       // first 'status' column
+  COL.reason  = findCol(headers,['rejection reason','reason']);
+
+  console.log('🔍 Column detection from CSV headers:');
+  const hOrig=parseCSVLine(lines[0]).map(h=>h.replace(/"/g,'').trim());
+  Object.entries(COL).forEach(([k,v])=>console.log(`  ${k}[${v}] = "${v>=0?hOrig[v]:'NOT FOUND'}"`));
+
+  // ── Fallback: if status not found by name, scan rows for Good/Bad/Rework ──
+  if(COL.status<0){
+    console.warn('Status column not found by name — scanning data rows...');
+    COL.status=detectStatusColumnFromData(lines.slice(1,50));
+    console.log('  Status column detected at idx:',COL.status);
+  }
+
+  if(COL.month<0||COL.status<0){
+    console.error('Critical columns missing!',COL);
+    return[];
+  }
+
   const data=[];
   for(let i=1;i<lines.length;i++){
     const v=parseCSVLine(lines[i]);
-    if(v.length<15)continue;
-    const month=textToMonth(v[COL_MONTH]||'');
+    if(v.length<5)continue;
+    const g=(idx)=>idx>=0?(v[idx]||'').replace(/"/g,'').trim():'';
+    const month=textToMonth(g(COL.month));
     if(!month)continue;
-    const statusRaw=(v[COL_STATUS]||'').trim();
+    const statusRaw=g(COL.status);
     const status=toStatus(statusRaw);
-    if(status==='Unknown')continue; // Skip rows with no recognised status
-    const skuVal=(v[COL_SKU]||'').trim();
-    const prodVal=(v[COL_PRODUCT]||'').trim();
+    if(status==='Unknown')continue;
+    const skuVal=g(COL.sku), prodVal=g(COL.product);
     data.push({
       month, status,
-      channel:(v[COL_CHANNEL]||'Unknown').trim()||'Unknown',
-      sku:skuVal,
-      product:prodVal||skuVal||'Unknown',
-      qty:Math.max(1,parseInt(v[COL_QTY])||1),
-      reason:(v[COL_REASON]||'Unknown').trim()||'Unknown',
-      brand:toBrand(skuVal||prodVal)
+      channel: g(COL.channel)||'Unknown',
+      sku:     skuVal,
+      product: prodVal||skuVal||'Unknown',
+      qty:     Math.max(1,parseInt(g(COL.qty))||1),
+      reason:  g(COL.reason)||'Unknown',
+      brand:   toBrand(skuVal||prodVal)
     });
   }
-  const sc={};data.forEach(r=>{sc[r.status]=(sc[r.status]||0)+1;});
-  const mc={};data.forEach(r=>{mc[r.month]=(mc[r.month]||0)+1;});
-  console.log('Parsed:',data.length,'| Status dist:',sc,'| Months:',mc);
+  const sc={},mc={};
+  data.forEach(r=>{sc[r.status]=(sc[r.status]||0)+1;mc[r.month]=(mc[r.month]||0)+1;});
+  console.log(`✅ Parsed ${data.length} records | Status:`,sc,'| Months:',mc);
   return data;
+}
+
+// ── Find first column whose header matches any of the given names ───
+function findCol(headers,names){
+  for(const name of names){
+    const idx=headers.findIndex(h=>h===name||h.includes(name));
+    if(idx>=0)return idx;
+  }
+  return -1;
+}
+
+// ── Scan sample rows to find which column has Good/Bad/Rework ───────
+function detectStatusColumnFromData(sampleLines){
+  const statusVals=new Set(['good','bad','rework','ok','reject','repair']);
+  const colCounts={};
+  sampleLines.forEach(line=>{
+    const v=parseCSVLine(line);
+    v.forEach((val,idx)=>{
+      if(statusVals.has((val||'').replace(/"/g,'').trim().toLowerCase())){
+        colCounts[idx]=(colCounts[idx]||0)+1;
+      }
+    });
+  });
+  const best=Object.entries(colCounts).sort((a,b)=>b[1]-a[1])[0];
+  return best?parseInt(best[0]):-1;
 }
 
 function parseCSVLine(line){
@@ -266,7 +314,6 @@ function parseCSVLine(line){
   vals.push(cur.trim());return vals;
 }
 
-// Extract month from text like "April26", "March26", "May26"
 function textToMonth(s){
   if(!s)return'';
   const l=s.toLowerCase();
@@ -274,7 +321,6 @@ function textToMonth(s){
   for(const[k,v]of Object.entries(map))if(l.includes(k))return v;
   return'';
 }
-
 function toStatus(s){
   if(!s)return'Unknown';
   const l=s.toLowerCase().trim();
@@ -283,7 +329,6 @@ function toStatus(s){
   if(l==='bad'||l==='reject'||l==='rejected')return'Bad';
   return'Unknown';
 }
-
 function toBrand(t){
   if(!t)return'Be Bodywise';
   const u=t.toUpperCase();
@@ -369,7 +414,7 @@ function renderOverviewCharts(){
   if(CHARTS.channels)CHARTS.channels.destroy();
   const chMap={};f.forEach(r=>{if(!chMap[r.channel])chMap[r.channel]={tot:0,def:0,rw:0};chMap[r.channel].tot+=r.qty;if(r.status==='Bad')chMap[r.channel].def+=r.qty;if(r.status==='Rework')chMap[r.channel].rw+=r.qty;});
   const topCh=Object.entries(chMap).map(([ch,d])=>({ch,defR:d.tot?(d.def/d.tot*100):0,rwR:d.tot?(d.rw/d.tot*100):0,totR:d.tot?((d.def+d.rw)/d.tot*100):0})).sort((a,b)=>b.totR-a.totR).slice(0,10);
-  if(topCh.length){CHARTS.channels=new Chart(document.getElementById('c-channels'),{type:'bar',data:{labels:topCh.map(c=>c.ch),datasets:[{label:'Defect % (Bad)',data:topCh.map(c=>c.defR.toFixed(1)),backgroundColor:'#ef4444',borderRadius:4},{label:'Rework %',data:topCh.map(c=>c.rwR.toFixed(1)),backgroundColor:'#f59e0b',borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{position:'top'},tooltip:{callbacks:{label:ctx=>ctx.dataset.label+': '+ctx.parsed.x+'%'}},datalabels:{color:'#fff',font:{weight:'bold',size:9},formatter:v=>v+'%',anchor:'end',align:'start'}},scales:{x:{title:{display:true,text:'Percentage (%)'}}}},plugins:[ChartDataLabels]});}
+  if(topCh.length){CHARTS.channels=new Chart(document.getElementById('c-channels'),{type:'bar',data:{labels:topCh.map(c=>c.ch),datasets:[{label:'Defect % (Bad)',data:topCh.map(c=>c.defR.toFixed(1)),backgroundColor:'#ef4444',borderRadius:4},{label:'Rework %',data:topCh.map(c=>c.rwR.toFixed(1)),backgroundColor:'#f59e0b',borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{position:'top'},tooltip:{callbacks:{label:ctx=>ctx.dataset.label+': '+ctx.parsed.x+'%'}},datalabels:{color:'#fff',font:{weight:'bold',size:9},formatter:v=>v+'%',anchor:'end',align:'start'}},scales:{x:{title:{display:true,text:'%'}}}},plugins:[ChartDataLabels]});}
 }
 
 function renderBrandAnalysis(){
@@ -380,9 +425,8 @@ function renderBrandAnalysis(){
 }
 
 function renderChannelTable(){
-  const f=filtered(),chMap={};
-  f.forEach(r=>{if(!chMap[r.channel])chMap[r.channel]={good:0,rework:0,bad:0};if(r.status==='Good')chMap[r.channel].good+=r.qty;else if(r.status==='Rework')chMap[r.channel].rework+=r.qty;else if(r.status==='Bad')chMap[r.channel].bad+=r.qty;});
-  document.getElementById('channel-tbody').innerHTML=Object.entries(chMap).sort((a,b)=>(b[1].good+b[1].rework+b[1].bad)-(a[1].good+a[1].rework+a[1].bad)).map(([ch,d])=>{
+  const f=filtered(),chMap={};f.forEach(r=>{if(!chMap[r.channel])chMap[r.channel]={good:0,rework:0,bad:0};if(r.status==='Good')chMap[r.channel].good+=r.qty;else if(r.status==='Rework')chMap[r.channel].rework+=r.qty;else if(r.status==='Bad')chMap[r.channel].bad+=r.qty;});
+  document.getElementById('ch-tbody').innerHTML=Object.entries(chMap).sort((a,b)=>(b[1].good+b[1].rework+b[1].bad)-(a[1].good+a[1].rework+a[1].bad)).map(([ch,d])=>{
     const tot=d.good+d.rework+d.bad||1;const defR=((d.bad/tot)*100).toFixed(1),rwR=((d.rework/tot)*100).toFixed(1),totR=((d.rework+d.bad)/tot*100);
     const risk=totR>30?'badge-crit':totR>20?'badge-high':totR>10?'badge-med':'badge-low';
     const label=totR>30?'CRITICAL':totR>20?'HIGH':totR>10?'MEDIUM':'OK';
@@ -397,15 +441,13 @@ function renderSkuTable(){
   const bf=document.getElementById('sku-brand-filter').value;let all=[];
   const add=(skus,brand,code)=>skus.forEach((s,i)=>all.push({...s,brand,code,rank:i+1}));
   if(bf==='all'){add(BRANDDATA.bb.skus,'Be Bodywise','bb');add(BRANDDATA.mm.skus,'Man Matters','mm');add(BRANDDATA.lj.skus,'Little Joys','lj');}
-  else if(bf==='bb')add(BRANDDATA.bb.skus,'Be Bodywise','bb');
-  else if(bf==='mm')add(BRANDDATA.mm.skus,'Man Matters','mm');
-  else if(bf==='lj')add(BRANDDATA.lj.skus,'Little Joys','lj');
+  else if(bf==='bb')add(BRANDDATA.bb.skus,'Be Bodywise','bb');else if(bf==='mm')add(BRANDDATA.mm.skus,'Man Matters','mm');else if(bf==='lj')add(BRANDDATA.lj.skus,'Little Joys','lj');
   const colors={bb:'#6366f1',mm:'#f97316',lj:'#14b8a6'};
   document.getElementById('sku-tbody').innerHTML=all.map(s=>{
     const tot=s.tot||1,dP=(s.bad/tot*100).toFixed(1),rP=(s.rw/tot*100).toFixed(1),tD=((s.bad+s.rw)/tot*100).toFixed(1);
     const bc=tD>70?'badge-crit':tD>50?'badge-high':tD>25?'badge-med':'badge-low';
     const rl=tD>70?'CRITICAL':tD>50?'HIGH':tD>25?'MEDIUM':'OK';
-    return`<tr><td class="nm" style="font-weight:700;color:var(--t3)">#${s.rank}</td><td><span style="display:inline-block;width:6px;height:6px;border-radius:2px;background:${colors[s.code]};margin-right:6px;vertical-align:middle"></span><span style="font-size:10px;color:var(--t2)">${s.brand.split(' ')[0]}</span></td><td class="nm" style="font-size:10px;color:var(--t3)">${s.sku}</td><td style="font-size:11px;max-width:260px">${s.name}</td><td class="nm">${s.tot.toLocaleString()}</td><td class="nm" style="color:var(--green)">${s.good.toLocaleString()}</td><td class="nm" style="color:var(--red)">${s.bad.toLocaleString()}</td><td class="nm" style="color:var(--amber)">${s.rw.toLocaleString()}</td><td><div class="mini-bar-wrap"><div class="mini-bar"><div class="mini-fill" style="width:${Math.min(100,s.bad/tot*100)}%;background:var(--red)"></div></div><span class="nm">${dP}%</span></div></td><td><div class="mini-bar-wrap"><div class="mini-bar"><div class="mini-fill" style="width:${Math.min(100,s.rw/tot*100)}%;background:var(--amber)"></div></div><span class="nm">${rP}%</span></div></td><td><span class="badge ${bc}">${rl}</span></td></tr>`;
+    return`<tr><td class="nm" style="font-weight:700;color:var(--t3)">#${s.rank}</td><td><span style="display:inline-block;width:6px;height:6px;border-radius:2px;background:${colors[s.code]};margin-right:6px;vertical-align:middle"></span><span style="font-size:10px;color:var(--t2)">${s.brand.split(' ')[0]}</span></td><td class="nm" style="font-size:10px;color:var(--t3)">${s.sku}</td><td style="font-size:11px;max-width:240px">${s.name}</td><td class="nm">${s.tot.toLocaleString()}</td><td class="nm" style="color:var(--green)">${s.good.toLocaleString()}</td><td class="nm" style="color:var(--red)">${s.bad.toLocaleString()}</td><td class="nm" style="color:var(--amber)">${s.rw.toLocaleString()}</td><td><div class="mini-bar-wrap"><div class="mini-bar"><div class="mini-fill" style="width:${Math.min(100,s.bad/tot*100)}%;background:var(--red)"></div></div><span class="nm">${dP}%</span></div></td><td><div class="mini-bar-wrap"><div class="mini-bar"><div class="mini-fill" style="width:${Math.min(100,s.rw/tot*100)}%;background:var(--amber)"></div></div><span class="nm">${rP}%</span></div></td><td><span class="badge ${bc}">${rl}</span></td></tr>`;
   }).join('');
 }
 
@@ -433,7 +475,7 @@ function renderTrends(){
   const chM={};top5.forEach(ch=>{chM[ch]={};AVAILABLE_MONTHS.forEach(m=>chM[ch][m]={good:0,bad:0,rework:0,total:0});});
   RAW_DATA.forEach(r=>{if(!top5.includes(r.channel)||!chM[r.channel][r.month])return;chM[r.channel][r.month].total+=r.qty;if(r.status==='Good')chM[r.channel][r.month].good+=r.qty;else if(r.status==='Bad')chM[r.channel][r.month].bad+=r.qty;else if(r.status==='Rework')chM[r.channel][r.month].rework+=r.qty;});
   const colors=['#3b82f6','#10b981','#f59e0b','#ef4444','#8b5cf6'];const datasets=[];
-  top5.forEach((ch,i)=>{const pct=(key)=>labels.map(m=>{const d=chM[ch][m];return d.total?((d[key]/d.total)*100).toFixed(1):null;});datasets.push({label:ch+' - Good%',data:pct('good'),borderColor:colors[i],backgroundColor:colors[i],tension:0.4,fill:false,borderWidth:2,pointRadius:3});datasets.push({label:ch+' - Bad%',data:pct('bad'),borderColor:colors[i],backgroundColor:colors[i],tension:0.4,fill:false,borderWidth:1.5,borderDash:[5,5],pointRadius:2});datasets.push({label:ch+' - Rework%',data:pct('rework'),borderColor:colors[i],backgroundColor:colors[i],tension:0.4,fill:false,borderWidth:1,borderDash:[2,2],pointRadius:2});});
+  top5.forEach((ch,i)=>{const pct=(key)=>labels.map(m=>{const d=chM[ch][m];return d.total?((d[key]/d.total)*100).toFixed(1):null;});datasets.push({label:ch+' Good%',data:pct('good'),borderColor:colors[i],backgroundColor:colors[i],tension:0.4,fill:false,borderWidth:2,pointRadius:3});datasets.push({label:ch+' Bad%',data:pct('bad'),borderColor:colors[i],backgroundColor:colors[i],tension:0.4,fill:false,borderWidth:1.5,borderDash:[5,5],pointRadius:2});datasets.push({label:ch+' Rework%',data:pct('rework'),borderColor:colors[i],backgroundColor:colors[i],tension:0.4,fill:false,borderWidth:1,borderDash:[2,2],pointRadius:2});});
   CHARTS.channelTrend=new Chart(document.getElementById('c-channel-trend'),{type:'line',data:{labels,datasets},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{boxWidth:8,font:{size:9}}},tooltip:{callbacks:{label:ctx=>ctx.dataset.label+': '+ctx.parsed.y+'%'}}},scales:{y:{beginAtZero:true,max:100,title:{display:true,text:'%'}}}}});
 }
 
@@ -456,7 +498,6 @@ function sampleData(){
   const ch=['Amazon','Flipkart','Myntra','Nykaa','Purplle','Blinkit'],st=['Good','Rework','Bad'],rs=['Rate Sticker','Box Damaged','Near Expiry','Missing Items'];
   const data=[];for(let i=0;i<5000;i++){const b=['Be Bodywise','Man Matters','Little Joys'][i%3];data.push({month:['January','February','March','April','May'][i%5],channel:ch[i%ch.length],brand:b,sku:b.substring(0,2).toUpperCase()+(10000+i),product:b+' Product '+(i%10),qty:Math.floor(Math.random()*30)+1,status:st[Math.floor(Math.random()*3)],reason:rs[Math.floor(Math.random()*rs.length)]});}return data;
 }
-
 init();
 </script>
 </body>
