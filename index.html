@@ -3,184 +3,684 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>RTV QC — Column Diagnostic</title>
+<title>RTV QC Analytics Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
 <style>
-body{font-family:monospace;background:#f8f9fc;color:#1a1d2e;padding:24px}
-h2{margin-bottom:16px;color:#3b82f6}
-.card{background:#fff;border:2px solid #d5d8e0;border-radius:12px;padding:20px;margin-bottom:20px}
-.ok{color:#10b981;font-weight:700}
-.warn{color:#f59e0b;font-weight:700}
-.err{color:#ef4444;font-weight:700}
-table{border-collapse:collapse;width:100%;font-size:12px}
-th,td{padding:7px 12px;border:1px solid #d5d8e0;text-align:left}
-th{background:#f4f5f8;font-weight:700}
-.hl{background:#fef3c7}
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#f8f9fc;--s1:#fff;--s2:#f4f5f8;--s3:#e8eaef;--border:#d5d8e0;--border2:#c1c5d1;--t1:#1a1d2e;--t2:#5b6278;--t3:#8a90a8;--blue:#3b82f6;--green:#10b981;--red:#ef4444;--amber:#f59e0b;--purple:#8b5cf6;--bb:#6366f1;--mm:#f97316;--lj:#14b8a6;--font:'Inter',sans-serif;--mono:'JetBrains Mono',monospace}
+body{font-family:var(--font);background:var(--bg);color:var(--t1);min-height:100vh}
+.header{background:var(--s1);border-bottom:2px solid var(--border);padding:14px 28px;position:sticky;top:0;z-index:100;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.header-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px}
+.logo-area{display:flex;align-items:center;gap:10px}
+.logo-icon{width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,var(--bb),var(--lj));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:14px;flex-shrink:0}
+.logo-text h1{font-size:17px;font-weight:700;color:var(--t1);margin-bottom:1px}
+.logo-text p{font-size:10px;color:var(--t2)}
+.header-right{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.filter-btn{font-family:var(--font);font-size:11px;font-weight:500;color:var(--t2);background:var(--s2);border:1.5px solid var(--border);border-radius:8px;padding:5px 12px;cursor:pointer;transition:all .2s}
+.filter-btn:hover{border-color:var(--blue);color:var(--blue)}
+.filter-btn.active{background:var(--blue);color:#fff;border-color:var(--blue)}
+.refresh-btn{font-family:var(--font);font-size:11px;font-weight:600;background:var(--green);color:#fff;border:none;border-radius:8px;padding:6px 14px;cursor:pointer;display:flex;align-items:center;gap:5px;transition:all .2s}
+.refresh-btn:hover{opacity:.9}.refresh-btn:disabled{opacity:.6;cursor:not-allowed}
+.auto-badge{font-size:10px;background:rgba(16,185,129,.15);color:var(--green);border:1.5px solid rgba(16,185,129,.3);border-radius:20px;padding:3px 10px;font-weight:600}
+.countdown{font-size:10px;color:var(--t3);font-family:var(--mono)}
+.month-filters{display:flex;gap:5px;flex-wrap:wrap;align-items:center}
+.month-label{font-size:10px;color:var(--t3);font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+.nav-tabs{display:flex;gap:3px;background:var(--s2);border-radius:10px;padding:3px;overflow-x:auto}
+.nav-tab{font-family:var(--font);font-size:12px;font-weight:500;color:var(--t2);background:transparent;border:none;border-radius:7px;padding:7px 16px;cursor:pointer;transition:all .2s;white-space:nowrap}
+.nav-tab:hover{color:var(--t1)}
+.nav-tab.active{background:#fff;color:var(--t1);box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.content{padding:24px 28px;max-width:1700px;margin:0 auto}
+.panel{display:none}.panel.active{display:block}
+
+/* ── PAIRED KPI CARDS ── */
+.kpi-row{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:24px}
+.kpi-pair{background:var(--s1);border:2px solid var(--border);border-radius:12px;padding:14px 16px;display:flex;align-items:stretch;gap:0;transition:all .2s;position:relative;overflow:hidden}
+.kpi-pair:hover{border-color:var(--blue);box-shadow:0 4px 12px rgba(59,130,246,.1)}
+.kpi-pair::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+.kpi-pair.blue::before{background:var(--blue)}.kpi-pair.green::before{background:var(--green)}.kpi-pair.red::before{background:var(--red)}.kpi-pair.amber::before{background:var(--amber)}.kpi-pair.purple::before{background:var(--purple)}
+.kp-side{flex:1;display:flex;flex-direction:column;justify-content:center}
+.kp-side:first-child{padding-right:12px}
+.kp-side:last-child{padding-left:12px;border-left:1.5px solid var(--border)}
+.kp-label{font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;font-weight:600}
+.kp-val{font-size:18px;font-weight:700;font-family:var(--mono);line-height:1;color:var(--t1)}
+.kp-val.sm{font-size:14px}
+.kp-sub{font-size:9px;color:var(--t2);margin-top:3px}
+.kpi-solo{background:var(--s1);border:2px solid var(--border);border-radius:12px;padding:14px;transition:all .2s;position:relative;overflow:hidden}
+.kpi-solo:hover{border-color:var(--blue)}
+.kpi-solo::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--purple)}
+.kpi-solo .kp-val{font-size:22px;font-weight:700;font-family:var(--mono);line-height:1;color:var(--t1)}
+
+/* ── BRAND SCORECARD ── */
+.brand-scorecard{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-bottom:24px}
+.brand-score-card{background:var(--s1);border:2px solid var(--border);border-radius:14px;padding:20px;position:relative;overflow:hidden;transition:all .3s}
+.brand-score-card:hover{box-shadow:0 6px 20px rgba(0,0,0,.08);border-color:var(--border2)}
+.brand-score-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px}
+.bsc-bb::before{background:linear-gradient(90deg,var(--bb),#a5b4fc)}.bsc-mm::before{background:linear-gradient(90deg,var(--mm),#fdba74)}.bsc-lj::before{background:linear-gradient(90deg,var(--lj),#5eead4)}
+.bsc-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px}
+.bsc-name{font-size:15px;font-weight:700;color:var(--t1)}.bsc-cat{font-size:10px;color:var(--t2);margin-top:2px}
+.bsc-badge{font-size:10px;font-family:var(--mono);font-weight:700;padding:3px 9px;border-radius:6px}
+.bsc-metrics{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px}
+.bsc-m{background:var(--s2);border-radius:8px;padding:9px;text-align:center}
+.bsc-m-val{font-size:16px;font-weight:700;font-family:var(--mono);line-height:1}
+.bsc-m-label{font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:.3px;margin-top:3px;font-weight:600}
+.bsc-bar-section{display:flex;flex-direction:column;gap:5px}
+.bsc-bar-row{display:flex;align-items:center;gap:6px}
+.bsc-bar-label{font-size:10px;color:var(--t2);font-weight:500;width:52px;flex-shrink:0}
+.bsc-bar-track{flex:1;height:7px;background:var(--s3);border-radius:4px;overflow:hidden}
+.bsc-bar-fill{height:100%;border-radius:4px;transition:width .8s ease}
+.bsc-bar-pct{font-size:10px;font-family:var(--mono);font-weight:600;color:var(--t1);width:34px;text-align:right;flex-shrink:0}
+.bsc-bar-val{font-size:9px;font-family:var(--mono);color:var(--t3);width:46px;text-align:right;flex-shrink:0}
+.bsc-cogs{background:linear-gradient(135deg,rgba(99,102,241,.07),rgba(99,102,241,.02));border:1px solid rgba(99,102,241,.2);border-radius:8px;padding:9px;margin-top:10px;display:flex;justify-content:space-between;align-items:center}
+.bsc-cogs-label{font-size:10px;color:var(--t2);font-weight:600}
+.bsc-cogs-val{font-size:13px;font-weight:700;font-family:var(--mono)}
+
+/* ── DEFECT 4-CHART GRID ── */
+.defect-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
+.defect-mini-card{background:var(--s1);border:2px solid var(--border);border-radius:12px;padding:14px;transition:border-color .2s}
+.defect-mini-card:hover{border-color:var(--border2)}
+.defect-mini-title{font-size:11px;font-weight:700;color:var(--t1);margin-bottom:3px}
+.defect-mini-sub{font-size:9px;color:var(--t3);margin-bottom:10px}
+.defect-mini-chart{height:180px;position:relative}
+
+/* ── GENERAL ── */
+.brand-radar-wrap{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-bottom:20px}
+.card{background:var(--s1);border:2px solid var(--border);border-radius:12px;padding:20px;transition:all .2s;margin-bottom:20px}
+.card:hover{border-color:var(--border2)}
+.card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.card-title{font-size:13px;font-weight:700;color:var(--t1)}
+.card-sub{font-size:10px;color:var(--t2);margin-top:2px}
+.chart-wrap{position:relative;height:280px}
+.table-wrap{overflow-x:auto}
+.table-container{max-height:460px;overflow-y:auto}
+.table-container::-webkit-scrollbar{width:5px;height:5px}
+.table-container::-webkit-scrollbar-track{background:var(--s2)}
+.table-container::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+.data-table{width:100%;border-collapse:collapse;font-size:11px}
+.data-table th{text-align:left;padding:9px 11px;font-size:10px;font-weight:700;color:var(--t1);text-transform:uppercase;letter-spacing:.5px;border-bottom:2px solid var(--border);background:var(--s2);cursor:pointer;user-select:none;white-space:nowrap}
+.data-table th:hover{background:var(--s3)}
+.data-table td{padding:9px 11px;border-bottom:1px solid var(--border);color:var(--t1);vertical-align:middle}
+.data-table tbody tr:hover{background:var(--s2)}
+.data-table tbody tr:last-child td{border-bottom:none}
+.badge{display:inline-block;font-size:9px;font-family:var(--mono);font-weight:600;padding:3px 7px;border-radius:5px;border:1.5px solid}
+.badge-high{background:rgba(239,68,68,.1);color:var(--red);border-color:rgba(239,68,68,.3)}
+.badge-med{background:rgba(245,158,11,.1);color:var(--amber);border-color:rgba(245,158,11,.3)}
+.badge-low{background:rgba(16,185,129,.1);color:var(--green);border-color:rgba(16,185,129,.3)}
+.badge-crit{background:rgba(220,38,38,.12);color:#dc2626;border-color:rgba(220,38,38,.35);font-weight:700}
+.mini-bar-wrap{display:flex;align-items:center;gap:6px}
+.mini-bar{width:55px;height:5px;border-radius:3px;background:var(--s3);overflow:hidden}
+.mini-fill{height:100%;border-radius:3px;transition:width .6s ease}
+.nm{font-family:var(--mono);font-size:10px;font-weight:500}
+.reason-bars{display:flex;flex-direction:column;gap:7px;margin-top:5px}
+.rb-row{display:flex;align-items:center;gap:7px}
+.rb-label{font-size:10px;font-weight:500;color:var(--t1);width:150px;flex-shrink:0}
+.rb-track{flex:1;height:20px;background:var(--s2);border-radius:5px;overflow:hidden;border:1px solid var(--border)}
+.rb-fill{height:100%;border-radius:4px;display:flex;align-items:center;padding-left:6px;font-size:9px;font-family:var(--mono);font-weight:600;color:#fff;transition:width 1s ease}
+.rb-pct{font-size:10px;font-family:var(--mono);font-weight:600;color:var(--t1);width:38px;text-align:right;flex-shrink:0}
+.heatmap-grid{display:grid;gap:5px}
+.hm-row{display:grid;grid-template-columns:140px repeat(8,1fr);gap:3px;align-items:center}
+.hm-header{display:grid;grid-template-columns:140px repeat(8,1fr);gap:3px;margin-bottom:6px}
+.hm-label{font-size:9px;font-weight:700;color:var(--t1);text-align:center;text-transform:uppercase;letter-spacing:.3px}
+.hm-ch{font-size:10px;font-weight:500;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hm-cell{height:30px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:9px;font-family:var(--mono);font-weight:600;transition:all .15s;border:1px solid transparent;cursor:default}
+.hm-cell:hover{transform:scale(1.08);z-index:2;border-color:var(--t1);box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.controls{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.brand-toggle{display:flex;gap:4px;background:var(--s2);border-radius:8px;padding:3px}
+.tog-btn{font-family:var(--font);font-size:11px;font-weight:600;color:var(--t2);background:transparent;border:none;border-radius:6px;padding:5px 12px;cursor:pointer;transition:all .2s}
+.tog-btn:hover{color:var(--t1)}
+.tog-btn.active{background:#fff;color:var(--t1);box-shadow:0 1px 3px rgba(0,0,0,.1)}
+.tog-btn.bb.active{background:var(--bb);color:#fff}
+.tog-btn.mm.active{background:var(--mm);color:#fff}
+.tog-btn.lj.active{background:var(--lj);color:#fff}
+.loading-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(248,249,252,.7);z-index:999;align-items:center;justify-content:center;flex-direction:column;gap:12px}
+.loading-overlay.show{display:flex}
+.spinner{width:38px;height:38px;border:3px solid var(--border);border-top-color:var(--blue);border-radius:50%;animation:spin .8s linear infinite}
+.loading-text{font-size:13px;color:var(--t2);font-weight:500}
+.value-chip{display:inline-block;font-size:9px;font-family:var(--mono);background:rgba(99,102,241,.1);color:var(--bb);border:1px solid rgba(99,102,241,.25);border-radius:4px;padding:2px 6px;font-weight:600}
+@media(max-width:1400px){.kpi-row{grid-template-columns:repeat(3,1fr)}.defect-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:1000px){.kpi-row,.grid-2,.brand-scorecard,.brand-radar-wrap,.grid-3,.defect-grid{grid-template-columns:1fr}}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+.kpi-pair,.brand-score-card,.card,.defect-mini-card{animation:fadeIn .4s ease both}
 </style>
 </head>
 <body>
-<h2>🔍 RTV Dashboard — Column Diagnostic Tool</h2>
-<div class="card">
-  <div id="status">Fetching CSV from Google Sheets...</div>
+<div class="loading-overlay" id="loading-overlay"><div class="spinner"></div><div class="loading-text">Fetching latest data from Google Sheets...</div></div>
+<div class="header">
+  <div class="header-top">
+    <div class="logo-area">
+      <div class="logo-icon">RTV</div>
+      <div class="logo-text"><h1>RTV QC Analytics Dashboard</h1><p id="data-source-label">Connecting to Google Sheets...</p></div>
+    </div>
+    <div class="header-right">
+      <span class="auto-badge">⚡ Auto-refresh ON</span>
+      <span class="countdown" id="countdown-label">Next refresh in 5:00</span>
+      <button class="refresh-btn" id="refresh-btn" onclick="manualRefresh()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+        Refresh Now
+      </button>
+    </div>
+  </div>
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;flex-wrap:wrap">
+    <span class="month-label">Filter:</span>
+    <div class="month-filters" id="month-filters"><button class="filter-btn active" onclick="filterMonth('all',this)">All Months</button></div>
+  </div>
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="showPanel('overview',this)">Overview</button>
+    <button class="nav-tab" onclick="showPanel('brands',this)">Brand Analysis & Trends</button>
+    <button class="nav-tab" onclick="showPanel('channels',this)">Channel Analysis</button>
+    <button class="nav-tab" onclick="showPanel('skus',this)">SKU Deep-Dive</button>
+    <button class="nav-tab" onclick="showPanel('heatmap',this)">Defect Heatmap</button>
+  </div>
 </div>
-<div id="output"></div>
+
+<div class="content">
+<!-- OVERVIEW -->
+<div class="panel active" id="overview">
+  <!-- CHANGE 1: Paired KPI cards -->
+  <div class="kpi-row" id="kpi-row"></div>
+  <!-- CHANGE 2: Brand Scorecards with values -->
+  <div class="brand-scorecard" id="brand-scorecard"></div>
+  <!-- CHANGE 3: 4 Defect charts -->
+  <div class="card" style="margin-bottom:20px">
+    <div class="card-head"><div><div class="card-title">Defect Breakdown by Category</div><div class="card-sub">Bad + Rework rejection reasons — All brands & brand-wise</div></div></div>
+    <div class="defect-grid">
+      <div class="defect-mini-card"><div class="defect-mini-title">🔵 All Brands</div><div class="defect-mini-sub">Combined</div><div class="defect-mini-chart"><canvas id="c-defect-all"></canvas></div></div>
+      <div class="defect-mini-card" style="border-color:rgba(99,102,241,.3)"><div class="defect-mini-title" style="color:var(--bb)">Be Bodywise</div><div class="defect-mini-sub">BB only</div><div class="defect-mini-chart"><canvas id="c-defect-bb"></canvas></div></div>
+      <div class="defect-mini-card" style="border-color:rgba(249,115,22,.3)"><div class="defect-mini-title" style="color:var(--mm)">Man Matters</div><div class="defect-mini-sub">MM only</div><div class="defect-mini-chart"><canvas id="c-defect-mm"></canvas></div></div>
+      <div class="defect-mini-card" style="border-color:rgba(20,184,166,.3)"><div class="defect-mini-title" style="color:var(--lj)">Little Joys</div><div class="defect-mini-sub">LJ only</div><div class="defect-mini-chart"><canvas id="c-defect-lj"></canvas></div></div>
+    </div>
+  </div>
+  <!-- CHANGE 4: Top 10 channels by COUNT -->
+  <div class="card">
+    <div class="card-head"><div><div class="card-title">Top 10 High-Risk Channels</div><div class="card-sub">Ranked by highest count of Defects + Reworks (not %)</div></div></div>
+    <div class="chart-wrap" style="height:340px"><canvas id="c-channels"></canvas></div>
+  </div>
+</div>
+
+<!-- BRAND ANALYSIS -->
+<div class="panel" id="brands">
+  <div class="brand-radar-wrap">
+    <div class="card" style="margin-bottom:0"><div class="card-head"><div><div class="card-title">Brand Quality Radar</div><div class="card-sub">Multi-dimensional performance</div></div></div><div class="chart-wrap"><canvas id="c-brand-radar"></canvas></div></div>
+    <div class="card" style="margin-bottom:0"><div class="card-head"><div class="card-title">Brand Metrics Comparison</div></div><div id="brand-metrics-grid"></div></div>
+  </div>
+  <div class="grid-3" id="brand-reason-charts" style="margin-top:20px"></div>
+  <h3 style="margin:28px 0 14px;font-size:15px;font-weight:700;color:var(--t1)">📈 Trend Analysis</h3>
+  <div class="grid-2">
+    <div class="card"><div class="card-head"><div class="card-title">Monthly Volume Breakdown</div></div><div class="chart-wrap"><canvas id="c-trend-vol"></canvas></div></div>
+    <div class="card"><div class="card-head"><div class="card-title">Category Trends Over Time</div></div><div class="chart-wrap"><canvas id="c-trend-cat"></canvas></div></div>
+  </div>
+  <div class="card"><div class="card-head"><div class="card-title">Monthly Defect & Rework Rate Trends (by Brand)</div></div><div class="chart-wrap"><canvas id="c-trend-dr"></canvas></div></div>
+  <div class="card"><div class="card-head"><div class="card-title">Channel-wise Return Trends</div></div><div class="chart-wrap"><canvas id="c-channel-trend"></canvas></div></div>
+</div>
+
+<!-- CHANNEL ANALYSIS — CHANGE 5: sorted by value -->
+<div class="panel" id="channels">
+  <div class="card">
+    <div class="card-head">
+      <div><div class="card-title">Channel Performance</div><div class="card-sub">Sorted by Bad + Rework COGS Value (highest first)</div></div>
+      <div class="brand-toggle">
+        <button class="tog-btn active" onclick="setChBrand('all',this)">All</button>
+        <button class="tog-btn bb" onclick="setChBrand('bb',this)">Be Bodywise</button>
+        <button class="tog-btn mm" onclick="setChBrand('mm',this)">Man Matters</button>
+        <button class="tog-btn lj" onclick="setChBrand('lj',this)">Little Joys</button>
+      </div>
+    </div>
+    <div class="table-container table-wrap">
+      <table class="data-table"><thead><tr>
+        <th>Channel</th><th>Total Qty</th><th>Good</th><th>Bad Qty</th><th>Rework Qty</th>
+        <th>Bad Value ₹</th><th>Rework Value ₹</th><th>Total Loss ₹</th>
+        <th>Defect %</th><th>Rework %</th><th>Risk</th>
+      </tr></thead><tbody id="ch-tbody"></tbody></table>
+    </div>
+  </div>
+</div>
+
+<!-- SKU DEEP-DIVE — CHANGE 6: Top 10 per brand (30 total), sorted by value -->
+<div class="panel" id="skus">
+  <div class="card">
+    <div class="card-head">
+      <div><div class="card-title">Critical SKUs — Top 10 per Brand (30 Total)</div><div class="card-sub">Sorted by Bad + Rework COGS Value (highest loss first)</div></div>
+      <div class="brand-toggle">
+        <button class="tog-btn active" onclick="setSkuBrand('all',this)">All (30)</button>
+        <button class="tog-btn bb" onclick="setSkuBrand('bb',this)">Be Bodywise (10)</button>
+        <button class="tog-btn mm" onclick="setSkuBrand('mm',this)">Man Matters (10)</button>
+        <button class="tog-btn lj" onclick="setSkuBrand('lj',this)">Little Joys (10)</button>
+      </div>
+    </div>
+    <div class="table-container table-wrap">
+      <table class="data-table"><thead><tr>
+        <th>#</th><th>Brand</th><th>SKU</th><th>Product Name</th>
+        <th>Total Qty</th><th>Good</th><th>Bad Qty</th><th>Rework Qty</th>
+        <th>COGS/Unit ₹</th><th>Bad Value ₹</th><th>Rework Value ₹</th><th>Total Loss ₹</th>
+        <th>Defect %</th><th>Rework %</th><th>Risk</th>
+      </tr></thead><tbody id="sku-tbody"></tbody></table>
+    </div>
+  </div>
+  <div class="grid-2">
+    <div class="card"><div class="card-head"><div class="card-title" style="color:var(--mm)">Man Matters — Top Critical SKUs by Value</div></div><div class="chart-wrap" style="height:240px"><canvas id="c-sku-mm"></canvas></div></div>
+    <div class="card"><div class="card-head"><div class="card-title" style="color:var(--lj)">Little Joys — Top Critical SKUs by Value</div></div><div class="chart-wrap" style="height:240px"><canvas id="c-sku-lj"></canvas></div></div>
+  </div>
+</div>
+
+<!-- HEATMAP — CHANGE 7: sorted by defect count -->
+<div class="panel" id="heatmap">
+  <div class="card"><div class="card-head"><div><div class="card-title">Defect Heatmap — Top 20 Channels × Top 8 Defect Types</div><div class="card-sub">Channels sorted by total defect count (highest at top)</div></div></div><div id="heatmap-container"></div></div>
+</div>
+</div>
 
 <script>
-const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSismHdOKJigedmrPENc8HXyW4TvqHek7e1ASCluZfi1s3jgQPZGhYJQjb_F5IoarAnOmybH7aIqrWG/pub?gid=1227720756&single=true&output=csv';
+const COGS={"MWBBNTP.2059.BO_N":23.751,"MWBWBCP.00166.B0_N":69.089,"MWBWBCP.00167.B0_N":222.3002,"MWBWBCP.00168.B0_N":161.5538,"MWBWBCP.00170.B0_N":125.7054,"MWBWBCP.00188.BO_N":69.62,"MWBWHFFS.0039.B0_N":13.4992,"MWBWHFFS.0040.B0_N":19.593,"MWBWHFFS.0041.B0_N":14.595,"MWBWHFP.00145.B0_N":178.9305,"MWBWHFP.00161.B0_N":33.7155,"MWBWHFP.00167.B0_N":114.4128,"MWBWHFP.00172.B0_N":66.9795,"MWBWHFP.0018.B0_N":79.779,"MWBWHFP.00188.BO_N":242.49,"MWBWHFP.0019.B0_N":94.6242,"MWBWHFP.0020.B0_N":89.6092,"MWBWHFP.00204.B0_N":253.617,"MWBWHFP.0021.B0_N":89.607,"MWBWHFP.00225.B0_N":95.55,"MWBWHFP.00229.B0_N":100.4115,"MWBWHFP.00310.B0_N":330.6345,"MWBWHFP.00531.B0_N":87.7065,"MWBWHFP.00538.B0_N":72.3458,"MWBWHFP.00541.B0_N":197.06,"MWBWHFP.00574.B0_N":69.148,"MWBWHFP.00575.B0_N":137.706,"MWBWHFP.00609.B0_N":105.2625,"MWBWHFP.00625.B0_N":168.1736,"MWBWHFP.00626.B0_N":218.4062,"MWBWHFP.00635.B0_N":128.7498,"MWBWHFP.00637.B0_N":61.6196,"MWBWHFP.00644.B0_N":61.0995,"MWBWHFP.00672.B0_N":260.721,"MWBWHFP.00689.B0_N":34.043,"MWBWHFP.00707.B0_N":119.427,"MWBWHFP.00711.B0_N":108.3075,"MWBWHFP.0081.B0_N":179.3715,"MWBWICP.00334.B0_N":114.45,"MWBWNTP.00168.B0_N":189.5145,"MWBWNTP.00341.B0_N":265.5345,"MWBWNTP.00345.B0_N":170.835,"MWBWNTP.00347.B0_N":208.593,"MWBWNTP.00348.B0_N":409.3425,"MWBWNTP.00349.B0_N":144.6795,"MWBWNTP.00356.B0_N":298.242,"MWBWNTP.00357.B0_N":238.812,"MWBWPCP.0066.B0_N":83.181,"MWBWPRP.00004.B0_N":223.2195,"MWBWSKK.00201.B0_N":84.4998,"MWBWSKK.0057.B0_N":22.6914,"MWBWSKK.00801.B0_N":348.1,"MWBWSKP.0001.B0_N":66.3632,"MWBWSKP.0002.B0_N":36.0726,"MWBWSKP.0003.B0_N":64.6522,"MWBWSKP.0005.B0_N":13.7116,"MWBWSKP.00132.B0_N":208.0785,"MWBWSKP.00165.B0_N":83.013,"MWBWSKP.00169.B0_N":43.188,"MWBWSKP.00206.B0_N":53.7726,"MWBWSKP.00214.B0_N":96.4532,"MWBWSKP.00226.B0_N":343.5495,"MWBWSKP.00240.B0_N":88.0634,"MWBWSKP.00241.B0_N":80.6884,"MWBWSKP.00265.B0_N":30.639,"MWBWSKP.00328.B0_N":82.3994,"MWBWSKP.00401.B0_N":91.4854,"MWBWSKP.00418.B0_N":39.648,"MWBWSKP.00419.B0_N":89.149,"MWBWSKP.00427.B0_N":88.9484,"MWBWSKP.00428.B0_N":72.5936,"MWBWSKP.00436.B0_N":86.1872,"MWBWSKP.00437.B0_N":47.2236,"MWBWSKP.00504.B0_N":27.825,"MWBWSKP.00505.B0_N":132.7264,"MWBWSKP.00525.B0_N":51.566,"MWBWSKP.00526.B0_N":42.48,"MWBWSKP.00532.B0_N":136.349,"MWBWSKP.00533.B0_N":81.9982,"MWBWSKP.00537.B0_N":58.5044,"MWBWSKP.00584.B0_N":123.6404,"MWBWSKP.00586.B0_N":94.1522,"MWBWSKP.00587.B0_N":60.5222,"MWBWSKP.00589.B0_N":48.1794,"MWBWSKP.00613.B7_N":171.0056,"MWBWSKP.00614.B0_N":54.634,"MWBWSKP.00626.B0_N":33.2288,"MWBWSKP.00630.B0_N":115.64,"MWBWSKP.00646.B0_N":51.9554,"MWBWSKP.00647.B0_N":91.804,"MWBWSKP.00648.B0_N":80.1102,"MWBWSKP.00649.B0_N":170.4746,"MWBWSKP.00650.B0_N":85.2196,"MWBWSKP.00651.B0_N":128.2778,"MWBWSKP.00652.B0_N":113.8582,"MWBWSKP.00653.B0_N":20.2134,"MWBWSKP.00657.B0_N":102.648,"MWBWSKP.00659.B0_N":109.2562,"MWBWSKP.00660.B0_N":33.0872,"MWBWSKP.00661.B0_N":21.0394,"MWBWSKP.00672.B0_N":121.7406,"MWBWSKP.00676.B0_N":109.209,"MWBWSKP.00677.B0_N":166.7104,"MWBWSKP.00680.B0_N":53.5484,"MWBWSKP.00681.B0_N":43.7544,"MWBWSKP.00684.B0_N":55.4364,"MWBWSKP.00687.B0_N":66.5756,"MWBWSKP.00690.B0_N":31.5532,"MWBWSKP.00697.B0_N":139.181,"MWBWSKP.00703.B0_N":92.63,"MWBWSKP.00771.B0_N":115.5574,"MWBWSKP.00777.B0_N":55.5426,"MWBWSKP.00787.B0_N":57.82,"MWBWSKP.00788.B0_N":55.46,"MWBWSKP.00797.B0_N":136.172,"MWBWSKP.0083.B0_N":0,"MWBWSKS.0045.B0_N":14.3724,"MWBWSKS.0049.B0_N":20.3314,"MWBWSKS.0050.B0_N":21.6294,"MWBWSKS.0051.B0_N":16.3076,"MWBWSKS.0052.B0_N":17.3106,"MWBWSKS.0054.B0_N":31.3054,"MWBWSKS.0065.B0_N":23.8478,"MWBWUAEBCP.0008B0_N":70.3516,"MWBWUAEOCP.0007B0_N":76,"MWBWUAESKP.0004B0_N":96.819,"MWBWUAESKP.0005B0_N":168.5158,"MWBWUSAHFP.00001.B0_N":141.3876,"MWBWUSAPR.00P.026_B0_N":158.12,"MWBWUSAPR.00P.027_B0_N":284.97,"MWBWUSAPRP.00003.B0_N":246.8368,"MWBWUSAPRP.00022.B0_N":461.7648,"MWLJDCP.0001.B0_N":29.7675,"MWLJDCP.00011.B0_N":39.795,"MWLJDCS.0001.B0_N":8.9775,"MWLJGCP.0009.B0_N":129.8,"MWLJGNP.00022.B0_N":5.074,"MWLJGNP.00051.B0_N":63,"MWLJGNP.00052.B0_N":63,"MWLJGNP.00053.B0_N":63,"MWLJGNP.00059.B0_N":57.75,"MWLJGNP.00071.B0_N":7.67,"MWLJHYP.0001.B0_N":75.7678,"MWLJHYP.0003.B0_N":65.7968,"MWLJHYP.0006.B0_N":76.23,"MWLJHYP.0007.B0_N":77.7,"MWLJNTK.00366.B0_N":13.986,"MWLJNTK.00367.B0_N":135.639,"MWLJNTK.00379.B0_N":14.973,"MWLJNTP.00017.B0_N":174.615,"MWLJNTP.00019.B0_N":217.0875,"MWLJNTP.0002.B0_N":103.0365,"MWLJNTP.00023.B0_N":175.938,"MWLJNTP.00027.B0_N":151.1055,"MWLJNTP.0003.B0_N":158.277,"MWLJNTP.00033.B0_N":281.589,"MWLJNTP.00034.B0_N":165.6375,"MWLJNTP.00040.B0_N":120.12,"MWLJNTP.00043.B0_N":111.5625,"MWLJNTP.00051.B0_N":96.138,"MWLJNTP.00056.B0_N":267.645,"MWLJNTP.00059.B0_N":184.023,"MWLJNTP.00060.B0_N":109.8195,"MWLJNTP.0007.B0_N":104.601,"MWLJNTP.000709.B0_N":335.412,"MWLJNTP.000748.B0_N":134.253,"MWLJNTP.000755.B0_N":111.3735,"MWLJNTP.000759.B0_N":215.0085,"MWLJNTP.000795.B0_N":63.399,"MWLJNTP.000796.B0_N":9.219,"MWLJNTP.000801.B0_N":123.5325,"MWLJNTP.000809.B0_N":142.485,"MWLJNTP.000810.B0_N":96.8205,"MWLJNTP.000813.B0_N":173.04,"MWLJNTP.000814.B0_N":116.508,"MWLJNTP.000820.B0_N":58.4745,"MWLJNTP.000836.B0_N":132.2265,"MWLJNTP.00122.B0_N":146.2755,"MWLJNTP.00124.B0_N":153.4995,"MWLJNTP.00126.B0_N":215.5755,"MWLJNTP.00138.B_N":31.8045,"MWLJNTP.00169.B0_N":327.579,"MWLJNTP.00177.B0_N":185.745,"MWLJNTP.00241.B0_N":99.183,"MWLJNTP.00248.B0_N":100.0335,"MWLJNTP.00339.B0_N":313.803,"MWLJNTP.00380.B0_N":99.33,"MWLJNTP.00381.B0_N":72.9645,"MWLJNTP.00406.B0_N":132.153,"MWLJNTP.00423.B0_N":173.0085,"MWLJNTP.00480.B0_N":101.325,"MWLJNTP.00481.B0_N":44.1,"MWLJNTP.00482.B0_N":173.3865,"MWLJNTP.00483.B0_N":173.187,"MWLJNTP.00484.B0_N":177.702,"MWLJNTP.00500.B0_N":488.0715,"MWLJNTP.00501.B0_N":39.018,"MWLJNTP.00507.B0_N":426.0375,"MWLJNTP.00518.B0_N":160.3455,"MWLJNTP.00519.B0_N":97.7655,"MWLJNTP.00520.B0_N":115.731,"MWLJNTP.00527.BO_N":330.0885,"MWLJNTP.00528.B0_N":200.046,"MWLJNTP.00529.B0_N":198.7125,"MWLJNTP.00530.B0_N":183.8445,"MWLJNTP.00531.B0_N":190.7955,"MWLJNTP.00532.B0_N":179.9805,"MWLJNTP.00533.B0_N":184.002,"MWLJNTP.00534.B0_N":175.077,"MWLJNTP.00535.B0_N":530.0085,"MWLJNTP.00536.B0_N":53.8545,"MWLJNTP.00541.BO_N":590.2995,"MWLJNTP.00542.BO_N":101.2305,"MWLJNTP.00548.B0_N":111.384,"MWLJNTP.00551.BO_N":82.6035,"MWLJNTP.00553.BO_N":155.4315,"MWLJNTP.00560.B0_N":72.891,"MWLJNTP.00561.B0_N":191.121,"MWLJNTP.00562.B0_N":15.0465,"MWLJNTP.00563.B0_N":14.4585,"MWLJNTP.00571.B0_N":142.926,"MWLJNTP.00572.B0_N":81.6585,"MWLJNTP.00574.BO_N":55.5345,"MWLJNTP.00584.BO_N":251.3385,"MWLJNTP.00586.BO_N":91.413,"MWLJNTP.00591.B0_N":12.0015,"MWLJNTP.00592.B0_N":10.458,"MWLJNTP.00605.BO_N":13.8075,"MWLJNTP.00607.BO_N":176.2005,"MWLJNTP.00608.BO_N":449.9985,"MWLJNTP.00609.BO_N":462.9345,"MWLJNTP.00610.BO_N":168.0105,"MWLJNTP.00615.BO_N":100.338,"MWLJNTP.00616.BO_N":112.623,"MWLJNTP.00617.BO_N":89.061,"MWLJNTP.00618.BO_N":81.69,"MWLJNTP.00636.B0_N":176.925,"MWLJNTP.00636.BO_N":145.446,"MWLJNTP.00662.BO_N":69.3,"MWLJNTP.00667.B0_N":449.2635,"MWLJNTP.00668.B0_N":406.6335,"MWLJNTP.00677.BO_N":3.54,"MWLJNTP.00697.B0_N":0,"MWLJNTP.00698.B0_N":170.709,"MWLJNTP.00699.B0_N":309.687,"MWLJNTP.00700.B0_N":331.2645,"MWLJNTS.0001.B0_N":10.773,"MWLJNTS.0002.B0_N":12.9465,"MWLJNTS.00021.B0_N":14.9625,"MWLJNTS.00022.B0_N":15.2102,"MWLJNTS.0003.B0_N":18.228,"MWLJNTS.00041.B0_N":21.042,"MWLJNTS.00043.B0_N":13.23,"MWLJNTS.00058.B0_N":16.779,"MWLJNTS.0006.BO_N":11.8125,"MWLJNTS.00064.B0_N":19.1415,"MWLJSKP.0002.B0_N":73.9624,"MWLJSKP.0003.B0_N":72.57,"MWLJSKP.0007.B0_N":74.045,"MWLJSKP.0008.B0_N":64.9,"MWLJSKP.0034.B0_N":113.3862,"MWLJSKS.0001.B0_N":16.2014,"MWMMBDK.0280.AAAA.B0_N":63,"MWMMBDP.0001.AAAA.B0_N":46.746,"MWMMBDP.0005.AAAA.B0_N":71.736,"MWMMBDP.0006.AAAA.B0_N":90.531,"MWMMBDP.0085.AAAA.B0_R":79.1805,"MWMMBDP.0128.AAAA.B0_R":115.5102,"MWMMBDP.0132.AAAA.B0_R":74.9654,"MWMMHKC.00001.AAAA.B0_N":1.77,"MWMMHRP.0001.AAAA.B0_N":59.1885,"MWMMHRP.0002.AAAA.B0_N":85.3848,"MWMMHRP.0003.AAAA.B0_N":63.126,"MWMMHRP.0004.AAAA.B0_N":75.621,"MWMMHRP.0006.AAAA.B0_R":115.185,"MWMMHRP.0007.AAAA.B0_R":0,"MWMMHRP.0008.AAAA.B0_R":87.6855,"MWMMHRP.0009.AAAA.B0_N":34.2195,"MWMMHRP.0009.AAAA.B0_R":57.708,"MWMMHRP.0010.AAAA.B0_N":155.967,"MWMMHRP.0010.AAAA.B0_R":69.4194,"MWMMHRP.0012.AAAA.B0_N":91.35,"MWMMHRP.0014.AAAA.B0_N":78.5295,"MWMMHRP.0015.AAAA.B0_N":114.4364,"MWMMHRP.0017.AAAA.B0_N":85.827,"MWMMHRP.0018.AAAA.B0_N":29.9985,"MWMMHRP.1001.AAAA.B0_N":50.5365,"MWMMHRP.1002.AAAA.B0_N":106.436,"MWMMHRP.1003.AAAA.B0_N":58.9174,"MWMMHRP.2050.AAAA.B0_N":61.95,"MWMMHRP.6190.AAAA.B0_N":220.0485,"MWMMHRP.6198.AAAA.B0_N":81.7215,"MWMMHRP.6286.AAAA.B0_N":64.05,"MWMMHRP.6298.AAAA.B0_N":144.2786,"MWMMHRP.6337.AAAA.B0_N":28.2555,"MWMMHRP.6622.B0_R":140.154,"MWMMHRP.6663.B0_N":164.0082,"MWMMHRP.7030.B0_N":136.5735,"MWMMHRP.7031.B0_N":61.95,"MWMMHRP.7106.B0_R":216.132,"MWMMHRP.7121.B0_R":157.5,"MWMMHRS.0017.AAAA.B0_N":0,"MWMMHRS.0018.AAAA.B0_N":19.4582,"MWMMHTP.0001.AAAA.B0_N":56.9822,"MWMMHTP.0005.AAAA.B0_N":15.93,"MWMMHTP.0007.AAAA.B0_N":50.681,"MWMMHTP.0127.AAAA.B0_N":82.6118,"MWMMHTS.1003.AAAA.B0_N":16.7914,"MWMMNTK.0129.AAAA.B0_N":268.6845,"MWMMNTK.0141.AAAA.B0_N":745.08,"MWMMNTP.000172.AAAAB0_N":285.957,"MWMMNTP.000186.AAAAB0_N":669.3668,"MWMMNTP.000187.AAAAB0_N":0,"MWMMNTP.000191.AAAAB0_N":124.6875,"MWMMNTP.0002.AAAA.B0_N":381.864,"MWMMNTP.0003.AAAA.B0_N":223.6815,"MWMMNTP.00205.AAAA.B0_N":130.6095,"MWMMNTP.00207.AAAA.B0_N":222.831,"MWMMNTP.00208.AAAA.B0_N":318.8325,"MWMMNTP.00210.AAAA.B0_N":1150.8,"MWMMNTP.00211.AAAA.B0_N":194.25,"MWMMNTP.0035.AAAABO_N":206.619,"MWMMNTP.0040.AAAA.B0_N":126.26,"MWMMNTP.0073.AAAA.B0_N":156.408,"MWMMNTP.0105.AAAA.B0_N":64.218,"MWMMNTP.0148.AAAA.B0_N":16.2225,"MWMMNTP.0149.AAAA.B0_N":81.354,"MWMMNTP.0169.AAAA.B0_N":266.8155,"MWMMNTP.0170.AAAA.B0_N":1161.3,"MWMMNTP.0171.AAAA.B0_N":220.4475,"MWMMNTP.6345.AAAABO_N":115.29,"MWMMNTP.6348.AAAABO_N":196.4445,"MWMMNTP.6349.AAAABO_N":226.8,"MWMMNTS.0032.AAAA.B0_N":39.501,"MWMMNTS.0034.AAAA.B0_N":68.6595,"MWMMOCP.0029.B0_N":708,"MWMMPRK.2026.AAAA.B0_N":95.0145,"MWMMPRK.2097.B0_N":212.7405,"MWMMPRP.0009.AAAA.B0_N":30.6915,"MWMMPRP.2022.AAAA.B0_N":72.2396,"MWMMPRP.2032.AAAA.B0_N":30.45,"MWMMPRP.2092.B0_N":114.1875,"MWMMSKP.5002.AAAA.B0_N":66.906,"MWMMSKP.5003.AAAA.B0_N":61.1948,"MWMMSKP.5012.AAAA.B0_N":48.439,"MWMMSKP.5049.AAAA.B0_N":45.4536,"MWMMSKP.5059.AAAA.B0_N":91.6978,"MWMMSKP.5061.AAAA.B0_N":93.0312,"MWMMSKP.5063.AAAA.B0_N":128.5846,"MWRLUSAPRK.00004.B0_N":227.598,"MWRLUSAPRP.00013.B0_N":249.8265,"MWRLUSAPRP.00014.B0_N":463.113,"MWRLUSAPRP.00021.B0_N":366.2505,"POBUAEBB1":25.725,"Sample_Bebodywise":1.05,"Sample_Littlejoys":1.18,"Sample_Manmatters":1.05,"MWBWHFP.0060.B0_N":168.15,"MWBWSKP.00585.B0_N":75.45,"MWBWSKS.0062.B0_N":28.13,"MWBWUAEBCP.0001B0_N":45.32,"MWBWUAEOCP.0001B0_N":46.08,"MWBWUAEOCP.0004B0_N":14.03,"MWBWUAEOCP.0005B0_N":28.05,"MWBWUAEOCP.0006B0_N":38.07,"MWBWUAEOCP.0008B0_N":170.09,"MWBWUAESKP.0003B0_N":111.27,"MWBWUAESKP.0007B0_N":231.54,"MWLJGCP.0006.B0_N":2,"MWLJGCP.0008.B0_N":14.01,"MWLJGNK.00077.B0_N":75.04,"MWLJGNP.00023.B0_N":13.13,"MWLJGNP.00026.B0_N":12.98,"MWLJGNP.00028.B0_N":13,"MWLJGNP.00031.B0_N":1.05,"MWLJNTP.00485.B0_N":169.61,"MWLJNTP.00603.BO_N":16.22,"MWLJNTP.00676.B0_N":8.68,"MWLJNTP.00696.B0_N":151.83,"MWLJNTS.00016.B0_N":12.4,"MWLJNTS.00018.B0_N":13.8,"MWLJNTS.00039.B0_N":11.34,"MWLJNTS.00056.B0_N":16.75,"MWLJNTS.0008.B0_N":11.15,"MWLJUAEOC.0001.B0_N":4.01,"MWLJUAEOC.0002.B0_N":37.07,"MWLJUAEP.0001.B0_N":103.53,"MWLJUAEP.00025.B0_N":23.61,"MWLJUAEP.00026.B0_N":24.55,"MWLJUAEP.00029.B0_N":63.12,"MWLJUAEP.00051.B0_N":93.08,"MWMMHRP.0013.AAAA.B0_N":104.19,"MWMMSKP.5005.AAAA.B0_N":30.78,"MWRLUSAPRK.00005.B0_N":241.35,"POBUAELJ1":38.52,"POBUAELJ13":56.03,"POBUAELJ14":30.52,"POBUAELJ15":10.02,"POBUAELJ16":10.02,"POBUAELJ17":10.02,"MWBWHFP.00610.B0_N":104.7585,"MWBWHFS.0021.B0_N":14.0595,"MWBWSKP.00524.B0_N":1.18,"MWBWUAEBCP.0007B0_N":67.1656,"MWBWUAEHFP.0001B0_N":157.1642,"MWBWUAENTP.0002B0_N":295.2495,"MWBWUAESKP.0006B1_N":54.929,"MWBWUAESKP.0008B0_N":126.0476,"MWBWUSAPR.00P.025_B0_N":260.721,"MWLJGCP.0005.B0_N":3.245,"MWLJNTP.00018.B0_N":55.65,"MWLJNTP.00589.B0_N":48.8985,"MWLJNTP.00678.B0_N":4.914,"MWLJNTS.00040.B0_N":16.212,"MWLJPCP.0003.B0_N":168.4686,"MWLJUAEP.00018.B0_N":192.171,"MWLJUAEP.00019.B0_N":206.6715,"MWLJUAEP.0002.B0_N":101.682,"MWLJUAEP.00023.B0_N":168.5145,"MWLJUAEP.00028.B0_N":41.9895,"MWLJUAEP.00031.B0_N":435.0465,"MWLJUAEP.00033.B0_N":111.384,"MWLJUAEP.00037.B0_N":16.4955,"MWLJUAEP.0004.B0_N":103.341,"MWLJUAEP.00044.B0_N":16.3065,"MWLJUAEP.00045.B0_N":82.3515,"MWLJUAEP.0008.B0_N":192.0555,"MWMMHRP.6226.AAAA.B0_N":0,"MWMMHRP.6662.B0_N":1.18,"MWMMHRP.6686.B0_R":93.45,"MWMMHRS.0009.AAAA.B0_N":12.369,"MWMMNTP.0004.AAAA.B0_N":180.054,"MWMMNTP.0109.AAAA.B0_N":406.77,"MWMMNTP.0110.AAAA.B0_N":52.353,"MWMMNTP.6346.AAAABO_N":99.7815,"MWRLUSAPRK.00001.B0_N":241.1325,"MWSBP.0007.AAAA.B0_N":823.64,"POBUAELJ11":11.8,"POBUAELJ12":11.8,"MWBWHFP.00129.B0_N":1.18,"MWBWHFP.00159.B0_N":1.18,"MWBWSKK.0059.B0_N":1.18,"MWBWSKP.0006.B0_N":94.62,"MWBWSKP.0011.B0_N":1.18,"MWBWSKP.00143.B0_N":1.18,"MWBWSKP.00266.B0_N":1.18,"MWBWSKP.00468.B0_N":1.18,"MWBWSKP.00469.B0_N":1.18,"MWBWSKP.00517.B0_N":1.18,"MWBWSKP.00536.B0_N":1.18,"MWBWSKP.00583.B0_N":86.65,"MWBWSKS.0038.B0_N":1.18,"MWBWUAEBCP.0002B0_N":67.83,"MWBWUAEBCP.0003B0_N":55.76,"MWBWUAEBCP.0004B0_N":68.53,"MWBWUAEBCP.0005B0_N":60.19,"MWBWUAEBCP.0006B0_N":65.51,"MWBWWMP.00122.B0_N":1.18,"MWLJGCP.00010.B0_N":118,"MWLJGNP.00021.B0_N":1.18,"MWLJGNP.00069.B0_N":79.06,"MWLJNTP.00032.B0_N":333.1,"MWLJNTP.00370.B0_N":67.23,"MWLJNTP.00582.B0_N":142.27,"MWLJNTP.00664.B0_N":91.88,"MWLJNTP.00687.B0_N":319.52,"MWLJSKP.0001.B0_N":109.5,"MWMMGCP.0005.AAAA.B0_N":0.65,"MWMMHRP.0005.AAAA.B0_N":1.18,"MWMMHRP.0020.AAAA.B0_N":1.18,"MWMMHRP.6483.AAAA.B0_N":86.39,"MWMMHRP.6533.AAAA.B0_R":1.18,"MWMMHTP.0006.AAAA.B0_N":1.18,"MWMMHTP.1001.AAAA.B0_N":1.05,"MWMMHTP.1012.AAAA.B0_N":1.05,"MWMMHTP.1022.AAAA.B0_N":1.05,"MWMMNSP.0006.B0_R":1.18,"MWMMNSP.0009.B0_N":1.18,"MWMMNTK.0059.AAAA.B0_N":1.05,"MWMMNTP.000174.AAAAB0_N":451.55,"MWMMNTP.0055.AAAA.B0_N":68.64,"MWMMNTP.0150.AAAA.B0_N":808.12,"MWMMPRP.2017.AAAA.B0_N":1.12,"MWMMPRP.2018.AAAA.B0_N":1.12,"MWMMSKP.5006.AAAA.B0_N":1.18,"POBUAELJ9":42,"MWBWICP.0085.B0_N":1.18,"MWBWPCP.0092.B0_N":93.62,"MWLJNTK.00102.B0_N":301.95,"MWLJUAEP.00049.B0_N":88,"MWLJUSANTP.00002.B0_N":92.27,"MWMMHKC.00002.AAAA.B0_N":1.18,"MWMMPRP.1001.AAAA.B0_N":97.42,"POBUAELJ7":17.7,"MWBWHFP.0017.B0_N":61.57,"MWBWHFP.00391.B0_N":105.36,"MWBWHRP.0061.AAAA.B0_R":72.35,"MWBWSKK.00452.B0_N":96.64,"MWBWSKP.00683.B0_N":1307.59,"MWBWUSAPRP.00001.B0_N":180.16,"MWLJGNP.00024.B0_N":15.59,"MWMMHRP.0005.AAAA.B0_R":36.42,"MWMMHRP.6770.B0_N":54.6,"MWMMHTP.1016.AAAA.B0_N":119.6,"MWMMNTP.000176.AAAAB0_N":476.12,"MWRLUSAPRP.00007.B0_N":358.41,"POBUAELJ6":44.8,"MWBWHFP.00397.B0_N":176.55,"MWBWHFP.00667.B0_N":185.06,"MWBWSKS.0064.B0_N":17.97,"MWBWUSAHFP.00002.B0_N":175.04,"MWLJGCP.0007.B0_N":14.7,"MWLJGNP.00025.B0_N":1.18,"MWLJGNP.00030.B0_N":1.05,"MWLJGNP.00041.B0_N":471.53,"MWLJNTP.00372.B0_N":181.95,"MWLJNTP.00558.B0_N":229.32,"MWLJNTP.00588.B0_N":72.41,"MWMMHTP.1017.AAAA.B0_N":124.58,"MWMMHTP.1018.AAAA.B0_N":47.78,"MWMMHTP.1023.AAAA.B0_N":124.97,"MWMMSKP.5007.AAAA.B0_N":1.18,"POBUAELJ2":44.24,"POBUAELJ3":18.31,"POBUAELJ4":17.38,"POBUAELJ5":18.31,"MWBWSKP.00627.B0_N":43.85,"MWBWSKP.0065.B0_N":33.57,"MWLJPCP.00016.B0_N":159.35,"MWLJPCP.0007.B0_N":138.93,"MWLJPCP.0008.B0_N":140.06,"MWMMHRP.7044.B0_N":126,"MWMMHTP.1002.AAAA.B0_N":53.47,"MWMMHTP.1024.AAAA.B0_N":104.55,"MWMMNTP.0112.AAAA.B0_N":84.47,"MWMMNTP.0147.AAAA.B0_N":19.09,"MWRLUSAPRK.00003.B0_N":231.76,"MWSSUSAPRP.00010.B0_N":358.29,"MWSSUSAPRP.0008.B0_N":347.57,"MWBWSKP.00506.B0_N":62.04,"MWBWSKP.00518.B0_N":1.18,"MWLJGNP.00027.B0_N":15.2,"MWMMBDP.0003.AAAA.B0_N":82.85,"MWMMHRP.6171.AAAA.B0_N":1.05,"MWMMHRS.0011.AAAA.B0_N":13.5,"MWMMHTP.0004.AAAA.B0_N":59.11,"MWMMNTP.0151.AAAA.B0_N":53.17,"MWMMSKP.5011.AAAA.B0_N":1.18,"MWRLUSAPRP.00010.B0_N":305.18,"OWNAPP.0001":1334.76,"MWMMHRP.0021.AAAA.B0_R":211.84,"MWLJNTP.0004.B0_N":106.74,"MWLJNTP.00407.B0_N":168.01,"MWMMHRP.6158.B0_N":144.18,"MWMMHTP.1009.AAAA.B0_N":47.78,"MWBWOCP.00002.B0_N":460.2,"MWMMHTP.1007.AAAA.B0_N":47.78,"MWMMHTP.1008.AAAA.B0_N":47.78,"MWMMHTP.1003.AAAA.B0_N":47.78,"MWBWSLP.00420.B0_N":133.12,"MWLJNTP.00123.B0_N":2.63,"MWMMPRP.2040.AAAA.B0_N":28.14,"MWBWSKK.00453.B0_N":68.86,"MWBWPCP.00174.B0_N":220.77,"MWMMHRP.6450.AAAA.B0_N":120.32,"MWLJUAEP.00041.B0_N":53.49,"MWLJGNP.00068.B0_N":11.8,"MWLJHCP.0001.B0_N":128.09,"MWLJNTK.00559.B0_N":108.65,"MWLJNTK.00612.B0_N":550.3,"MWLJPCP.0001.B0_N":131.18,"MWLJUAEP.00042.B0_N":14.76,"MWLJUAEP.00047.B0_N":132.41,"MWMMPRP.0010.AAAA.B0_N":119.62,"MWBWHFS.0020.B0_N":43.67,"MWBWSKKC.00001.AAAA.B0_N":3.58,"MWBWSKP.0088.B0_N":15.15,"MWBWSKS.0060.B0_N":31.64,"MWBWSKS.0061.B0_N":32.78,"MWBWUSAPRP.00021.B0_N":237.6,"MWLJDCP.0002.B0_N":119.86,"MWLJDCP.0003.B0_N":69.3,"MWLJDCP.0007.B0_N":44.25,"MWLJGNP.0001.B0_N":291.2,"MWLJGNP.00040.B0_N":211.93,"MWLJHYP.0005.B0_N":82.6,"MWLJNTS.00057.B0_N":19.51,"MWLJNTS.00059.B0_N":18.46,"MWMMHRK.6856.B0_N":43.68,"MWMMNSK.0005.B1_R":159.16,"MWMMNTP.0072.AAAA.B0_N":256.39,"MWMMNTP.0127.AAAA.B0_N":186.48,"MWMMPRP.2090.B0_N":89.76,"MWMMPRP.2091.B0_N":75.44,"MWLJGNP.00029.B0_N":15.34,"MWBWWMP.00147.B0_N":60.99,"MWLJUAEP.00039.B0_N":135.7,"MWLJUAEP.00040.B0_N":106.62,"MWLJNTK.00611.B0_N":353.55,"MWBWSKS.0006.B0_N":13.92,"MWMMPRP.2020.AAAA.B0_N":186.01,"MWLJUAEP.00035.B0_N":78.85,"MWLJUAEP.00036.B0_N":79.65,"MWLJNTK.00613.B0_N":693.64,"MWBWHFP.00623.B0_N":92.71,"MWBWNTP.00339.B_N":94.93,"MWBWHFP.00622.B0_N":188.63,"MWBWHFP.00160.B0_N":142.43,"MWMMPKC.00001.AAAA.B0_N":1.76,"MWBWHFP.00624.B0_N":105.17,"MWBWPCS.0038.B0_N":9.98,"MWBWSKP.0012.B0_N":115.4,"MWMMHTP.1004.AAAA.B0_N":47.78,"MWLJNTP.00302.B0_N":152.57,"MWLJNTP.00042.B0_N":77.68,"MWLJNTP.00037.B0_N":112.69,"MWLJNTP.00125.B0_N":82.25,"MWMMNTP.0038.AAAA.B0_N":1216.93,"MWBWWMP.00123.B0_N":198.33,"MWLJGNP.0002.B0_N":170.24,"MWMMPRP.2019.AAAA.B0_N":97.22,"MWBWHFP.0022.B0_R":135.56,"MWLJNTP.00067.B0_N":156.18,"MWLJNTS.00031.B0_N":24.78,"MWLJNTS.00034.B0_N":12.63,"MWBWICP.0084.B0_N":79.63,"MWMMSLP.0001.B0_N":79.86,"MWMMNTS.0036.AAAA.B0_N":38.11,"MWMMHTP.1005.AAAA.B0_N":123.64,"MWLJGNP.00056.B0_N":14.16,"MWLJSKP.0004.B0_N":61.75,"MWMMPRP.2041.AAAA.B0_N":28.17,"MWBWHFFS.0033.B0_N":21.55,"MWBWHFFS.0038.B0_N":2.86,"MWBWHFFS.0044.B0_N":14.16,"MWBWHFK.00221.B0_N":91.83,"MWBWHFK.0089.B0_N":194.57,"MWBWHFP.00146.B0_N":53.19,"MWBWHFP.00231.B0_N":173.34,"MWBWHFP.00529.B0_N":79.37,"MWBWHFP.00616.B0_N":103.77,"MWBWHFS.0017.B0_N":24.34,"MWBWICP.0079.B0_N":100.15,"MWBWICP.0080.B0_N":66.14,"MWBWICP.0087.B0_N":75.3,"MWBWOCP.00001.B0_N":271.03,"MWBWOCP.00007.B0_N":63.03,"MWBWPCK.0001.B0_N":12.27,"MWBWPCK.0002.B0_N":6.2,"MWBWPCK.0003.B0_N":2.36,"MWBWPCK.0004.B0_N":1.63,"MWBWPCK.0005.B0_N":4.91,"MWBWPCK.0006.B0_N":24.55,"MWBWPCK.0007.B0_N":6.16,"MWBWPCP.00001.B0_N":657.87,"MWBWPCP.00134.B0_N":193.06,"MWBWPCS.0035.B0_N":18.96,"MWBWPCS.0037.B0_N":12.93,"MWBWSKK.0056.B0_N":24.61,"MWBWSKP.0013.B0_N":174.86,"MWBWSKP.00538.B0_N":113.63,"MWBWSKS.0005.B0_N":20.53,"MWBWSKS.0036.B0_N":31.57,"MWBWSKS.0040.B0_N":22.42,"MWBWSKS.0042.B0_N":7.26,"MWBWSKS.0059.B0_N":48.52,"MWBWSKS.0066.B0_N":28.79,"MWBWSKS.0067.B0_N":47.75,"MWBWSKS.0070.B0_N":21.97,"MWBWSLP.00230.B0_N":144.61,"MWBWUTP.0067.B0_N":124.17,"MWBWUTP.0068.B0_N":291.3,"MWBWUTP.0073.B0_N":16.65,"MWBWWMP.00105.B0_N":356.88,"MWBWWMP.00195.B0_N":132.18,"MWBWWMP.0027.B0_N":139.87,"MWBWWMP.0028.B0_N":97.42,"MWBWWMP.0098.B0_N":49.43,"MWLJGNP.00012.B0_N":1.05,"MWLJGNP.00016.B0_N":0.85,"MWLJGNP.0003.B0_N":35.41,"MWLJGNP.0009.B0_N":58.61,"MWLJHYP.0002.B0_N":82.6,"MWLJNTK.00101.B0_N":117.06,"MWLJNTK.00104.B0_N":76.3,"MWLJNTP.0001.B0_N":129.04,"MWLJNTP.00041.B0_N":81.11,"MWLJNTP.00052.B0_N":79.3,"MWLJNTP.0008.B0_N":70.8,"MWLJNTP.00113.B0_N":47.04,"MWLJNTP.00148.B0_N":17.7,"MWLJNTS.00032.B0_N":11.15,"MWLJNTS.0004.B0_N":12.85,"MWLJNTS.0007.B0_N":10.68,"MWLJPCK.0001.B0_N":24.01,"MWLJPCK.0002.B0_N":9.65,"MWLJPCK.0003.B0_N":12.17,"MWLJPCK.0004.B0_N":1.77,"MWLJPCK.0005.B0_N":8.23,"MWLJPCK.0006.B0_N":34.79,"MWLJPCK.0007.B0_N":11.8,"MWLJPCK.0008.B0_N":16.28,"MWLJPCK.0009.B0_N":6.89,"MWLJPCP.00010.B0_N":143.66,"MWLJPCP.00011.B0_N":141.75,"MWLJPCP.00017.B0_N":126,"MWLJPCP.0005.B0_N":110.68,"MWLJPCP.0006.B0_N":126,"MWLJPCP.0009.B0_N":141.75,"MWLJSKP.0005.B0_N":67.97,"MWMMBDP.0002.AAAA.B0_N":28.92,"MWMMBDP.0004.AAAA.B0_N":116.53,"MWMMHRP.0011.AAAA.B0_N":85.86,"MWMMHRP.0015.AAAA.B0_R":92.39,"MWMMHRP.0016.AAAA.B0_N":141.54,"MWMMHRP.0019.AAAA.B0_N":144.95,"MWMMHRP.0022.AAAA.B0_R":106.04,"MWMMHRP.2055.AAAA.B0_N":92.67,"MWMMHRP.6200.AAAA.B0_N":86.61,"MWMMHRP.6474.AAAA.B0_N":151.43,"MWMMHRS.00013.AAAA.B0_N":19.12,"MWMMHRS.0001.AAAA.B0_N":15.42,"MWMMHRS.0002.AAAA.B0_N":25.84,"MWMMHRS.0003.AAAA.B0_N":23.45,"MWMMHRS.0004.AAAA.B0_N":13.1,"MWMMHRS.0007.AAAA.B0_N":22.79,"MWMMHRS.0008.AAAA.B0_N":1.12,"MWMMHRS.0010.AAAA.B0_N":24.67,"MWMMHRS.0012.AAAA.B0_N":20.26,"MWMMHRS.0013.AAAA.B0_N":4.14,"MWMMHRS.0014.AAAA.B0_N":4.6,"MWMMHRS.0015.AAAA.B0_N":8.98,"MWMMHRS.0016.AAAA.B0_N":4.72,"MWMMHRS.0019.AAAA.B0_N":12.38,"MWMMHRS.0020.AAAA.B0_N":13,"MWMMHTP.0002.AAAA.B0_N":67.85,"MWMMHTP.0003.AAAA.B0_N":56.01,"MWMMHTP.1006.AAAA.B0_N":94.2,"MWMMHTP.1010.AAAA.B0_N":138.08,"MWMMHTP.1011.AAAA.B0_N":68.78,"MWMMHTP.1013.AAAA.B0_N":122.85,"MWMMHTP.1014.AAAA.B0_N":125.92,"MWMMHTP.1015.AAAA.B0_N":129.82,"MWMMHTP.1019.AAAA.B0_N":129.93,"MWMMHTP.1020.AAAA.B0_N":129.96,"MWMMHTP.1021.AAAA.B0_N":47.79,"MWMMHTS.1001.AAAA.B0_N":10.62,"MWMMHTS.1002.AAAA.B0_N":23.15,"MWMMHYKC.00001.AAAA.B0_N":2.36,"MWMMIMP.0001.AAAA.B0_N":140.42,"MWMMNTK.0100.AAAA.B0_N":560.33,"MWMMNTP.0001.AAAA.B0_N":55.77,"MWMMNTP.0012.AAAA.B0_N":233.89,"MWMMNTP.0013.AAAA.B0_N":88.75,"MWMMNTP.0014.AAAA.B0_N":195.74,"MWMMNTP.0019.AAAA.B0_N":164.1,"MWMMNTP.0041.AAAA.B0_N":803.3,"MWMMNTP.0047.AAAA.B0_N":313.94,"MWMMNTS.0001.AAAA.B0_N":35.16,"MWMMNTS.0033.AAAA.B0_N":12.79,"MWMMNTS.0037.AAAA.B0_N":10.34,"MWMMNTS.0038.AAAA.B0_N":7.32,"MWMMNTS.0043.AAAA.B0_N":7.26,"MWMMOCP.0001.B0_N":270.11,"MWMMOCP.0002.B0_N":457.42,"MWMMOCP.0003.B0_N":44.06,"MWMMOCP.0004.B0_N":124.01,"MWMMOCP.0005.B0_N":125.6,"MWMMOCP.0006.B0_N":479.2,"MWMMOCP.0019.B0_N":7.26,"MWMMPCK.0001.AAAA.B0_N":36.58,"MWMMPCK.0002.AAAA.B0_N":10.8,"MWMMPCK.0003.AAAA.B0_N":11.05,"MWMMPCK.0004.AAAA.B0_N":4.83,"MWMMPCK.0005.AAAA.B0_N":2.77,"MWMMPCK.0006.AAAA.B0_N":3.89,"MWMMPCK.0007.AAAA.B0_N":1.3,"MWMMPCK.0008.AAAA.B0_N":1.6,"MWMMPCK.0009.AAAA.B0_N":4.37,"MWMMPCK.0010.AAAA.B0_N":41.31,"MWMMPCK.0013.AAAA.B0_N":6.8,"MWMMPCK.0015.AAAA.B0_N":4.91,"MWMMPCK.0016.AAAA.B0_N":5.95,"MWMMPCK.0017.AAAA.B0_N":4.43,"MWMMPCK.0018.AAAA.B0_N":6.08,"MWMMPRP.0007.AAAA.B0_R":6.94,"MWMMPRP.0008.AAAA.B0_R":10.83,"MWMMPRP.0040.AAAA.B0_N":73.16,"MWMMPRP.0041.AAAA.B0_N":67.85,"MWMMPRP.2016.AAAA.B0_N":28.32,"MWMMPRP.2021.AAAA.B0_N":56.54,"MWMMPRP.2034.AAAA.B0_N":151.42,"MWMMPRP.2045.AAAA.B0_N":64.4,"MWMMPRS.1001.AAAA.B0_N":10.74,"MWMMPRS.1002.AAAA.B0_N":20.65,"MWMMSKC.00001.AAAA.B0_N":1.81,"MWMMSKKC.00001.AAAA.B0_N":2.03,"MWMMSKP.5001.AAAA.B0_N":155.05,"MWMMSKP.5004.AAAA.B0_N":87.39,"MWMMSKP.5008.AAAA.B0_N":183.96,"MWMMSKP.5009.AAAA.B0_N":69.95,"MWMMSKP.5010.AAAA.B0_N":138.72,"MWMMSKS.5002.AAAA.B0_N":32.77,"MWMMSKS.5003.AAAA.B0_N":18.93,"MWMMSMP.4001.AAAA.B0_N":123.01,"MWMMSMP.4002.AAAA.B0_N":41.44,"MWMMSMP.4003.AAAA.B0_N":135.87,"MWMMSMP.4004.AAAA.B0_N":106.28,"MWMMSMP.4005.AAAA.B0_N":133.62,"MWMMWKC.00001.AAAA.B0_N":2.04,"MWMMWTP.0001.AAAA.B0_N":112.67,"MWMMWTP.1001.AAAA.B0_N":79.53,"MWMMWTP.1002.AAAA.B0_N":126.76,"MWMMWTP.1003.AAAA.B0_N":232.15,"MWMMWTP.1004.AAAA.B0_N":120.37,"MWLJGNP.00045.B0_N":20.26,"MWLJNTK.00470.B0_N":20.05,"MWLJNTP.00153.B0_N":126.57,"MWMMNTS.0035.AAAA.B0_N":38.15,"MWLJGNP.00011.B0_N":1.42,"MWLJNTKS.00046.B0_N":18.37,"MWMMNTP.0104.AAAA.B0_N":172.23,"MWLJNTS.00017.B0_N":13.49,"MWBWSKK.0058.B0_N":27.61,"MWLJUAEP.00032.B0_N":62.54,"MWLJUAEP.00010.B0_N":23.73,"MWLJUAEP.00016.B0_N":47.04,"MWLJUAEP.00020.B0_N":392,"MWLJUAEP.00021.B0_N":313.6,"MWLJUAEP.00022.B0_N":487.2,"MWLJUAEP.00027.B0_N":87.36,"MWLJUAEP.00030.B0_N":19.47,"MWLJUAEP.0006.B1_N":126.84,"MWLJUAEP.0007.B0_N":75.74,"MWLJUAEP.0009.B0_N":11.2,"MWBWUSAPRP.00002.B0_N":193.33,"MWBWUSAPRP.00004.B0_N":237.6,"MWBWUSAPRP.00005.B0_N":421.26,"MWBWUSAPRP.00006.B0_N":280.35,"MWBWUSAPRP.00007.B0_N":268.05,"MWSSUSAPRK.00001.B0_N":251.07,"MWRLUSAPRK.00006.B0_N":459.49,"MWLJUAEP.00043.B0_N":10.28,"MWBWUAEHFP.0002B0_N":89.49,"MWLJGNP.00531.BO_N":103.84,"POBUAELJ10":11.8,"POBUAELJ8":41.48};
 
-function parseCSVLine(line) {
-  const vals = []; let cur = '', inQ = false;
-  for (const c of line) {
-    if (c === '"') inQ = !inQ;
-    else if (c === ',' && !inQ) { vals.push(cur.trim()); cur = ''; }
-    else cur += c;
-  }
-  vals.push(cur.trim());
-  return vals.map(v => v.replace(/^"|"$/g, '').trim());
-}
+const CSV_URL='https://docs.google.com/spreadsheets/d/e/2PACX-1vSismHdOKJigedmrPENc8HXyW4TvqHek7e1ASCluZfi1s3jgQPZGhYJQjb_F5IoarAnOmybH7aIqrWG/pub?gid=1227720756&single=true&output=csv';
+const AUTO_REFRESH_SECONDS=300;
+const MONTH_ORDER=['January','February','March','April','May','June','July','August','September','October','November','December'];
+const PALETTE=['#3b82f6','#10b981','#f59e0b','#ef4444','#8b5cf6','#14b8a6','#f97316','#6366f1'];
 
-async function run() {
-  try {
-    const resp = await fetch(CSV_URL + '&t=' + Date.now());
-    const text = await resp.text();
-    const lines = text.split('\n').filter(l => l.trim());
-    
-    document.getElementById('status').innerHTML = `<span class="ok">✅ CSV fetched — ${lines.length - 1} rows, ${lines[0].split(',').length} columns</span>`;
+let RAW_DATA=[],CURRENT_MONTH='all',AVAILABLE_MONTHS=[],BRANDDATA={bb:{},mm:{},lj:{}},CHARTS={};
+let countdownSeconds=AUTO_REFRESH_SECONDS,countdownInterval=null;
+let SKU_BRAND='all',CH_BRAND='all';
+let COL={month:-1,channel:-1,sku:-1,product:-1,qty:-1,status:-1,reason:-1};
 
-    const headers = parseCSVLine(lines[0]);
-    const headersLower = headers.map(h => h.toLowerCase().trim());
+async function init(){showLoading(true);await loadData();processData();buildMonthFilters();renderAll();showLoading(false);startAutoRefresh();}
+function showLoading(s){document.getElementById('loading-overlay').classList.toggle('show',s);}
 
-    // --- DETECT COLUMNS ---
-    function findCol(names) {
-      for (const n of names) {
-        const i = headersLower.findIndex(h => h === n || h.includes(n));
-        if (i >= 0) return i;
-      }
-      return -1;
-    }
-
-    // Detect status from data rows (primary)
-    const statusVals = new Set(['good','bad','rework','ok','reject','repair','rejected']);
-    const colCounts = {};
-    lines.slice(1, 100).forEach(line => {
-      parseCSVLine(line).forEach((v, i) => {
-        if (statusVals.has(v.toLowerCase())) colCounts[i] = (colCounts[i] || 0) + 1;
-      });
-    });
-    const dataStatus = Object.entries(colCounts).sort((a, b) => b[1] - a[1])[0];
-    const statusByData = dataStatus ? parseInt(dataStatus[0]) : -1;
-    const statusByHeader = findCol(['status']);
-
-    const COLS = {
-      month:   findCol(['month']),
-      channel: findCol(['channel name', 'channel']),
-      sku:     findCol(['sku', 'ean']),
-      product: findCol(['prod', 'product name', 'product']),
-      qty:     findCol(['qty', 'quantity']),
-      status:  statusByData >= 0 ? statusByData : statusByHeader,
-      reason:  findCol(['rejection reason', 'reason'])
-    };
-
-    // --- PARSE DATA ---
-    let total=0, good=0, bad=0, rework=0, noStatus=0, noMonth=0;
-    const statusDist = {}, monthDist = {};
-    const sampleRows = [];
-
-    lines.slice(1).forEach((line, idx) => {
-      const v = parseCSVLine(line);
-      if (v.length < 5) return;
-      const g = i => i >= 0 ? (v[i] || '') : '';
-      const month = g(COLS.month);
-      const statusRaw = g(COLS.status);
-      const qty = parseInt(g(COLS.qty)) || 0;
-
-      if (!month) { noMonth++; return; }
-      statusDist[statusRaw] = (statusDist[statusRaw] || 0) + 1;
-      if (['Good','Bad','Rework','good','bad','rework','ok'].includes(statusRaw)) {
-        const sNorm = statusRaw.charAt(0).toUpperCase() + statusRaw.slice(1).toLowerCase();
-        total += qty;
-        if (sNorm === 'Good' || statusRaw.toLowerCase() === 'ok') good += qty;
-        else if (sNorm === 'Bad') bad += qty;
-        else if (sNorm === 'Rework') rework += qty;
-        const m = (month.toLowerCase().includes('jan')?'January':month.toLowerCase().includes('feb')?'February':month.toLowerCase().includes('mar')?'March':month.toLowerCase().includes('apr')?'April':month.toLowerCase().includes('may')?'May':month);
-        monthDist[m] = (monthDist[m] || 0) + qty;
-      } else noStatus++;
-
-      if (sampleRows.length < 3) {
-        sampleRows.push({month, ch: g(COLS.channel), sku: g(COLS.sku), qty: g(COLS.qty), status: statusRaw, reason: g(COLS.reason)});
-      }
-    });
-
-    let html = '';
-
-    // Column map table
-    html += `<div class="card"><h3>📋 Column Mapping</h3><br><table><thead><tr><th>Field</th><th>Idx</th><th>Header Found</th><th>Status</th></tr></thead><tbody>`;
-    Object.entries(COLS).forEach(([field, idx]) => {
-      const h = idx >= 0 ? headers[idx] : 'NOT FOUND';
-      const ok = idx >= 0;
-      html += `<tr${field==='status'||field==='qty'||field==='month'?' class="hl"':''}>
-        <td><strong>${field}</strong></td>
-        <td>${idx}</td>
-        <td>${h}</td>
-        <td><span class="${ok?'ok':'err'}">${ok?'✅':'❌ MISSING'}</span></td>
-      </tr>`;
-    });
-    html += `</tbody></table>`;
-    html += `<br><p><strong>Status detected by data scan:</strong> idx ${statusByData} — ${statusByData>=0?headers[statusByData]:'not found'}</p>`;
-    html += `<p><strong>Status detected by header name:</strong> idx ${statusByHeader} — ${statusByHeader>=0?headers[statusByHeader]:'not found'}</p>`;
-    if (statusByData !== statusByHeader) {
-      html += `<p class="err">⚠️ MISMATCH: Data scan says ${statusByData}, header says ${statusByHeader}. Using data scan result.</p>`;
-    } else {
-      html += `<p class="ok">✅ Both methods agree on Status column idx ${statusByData}</p>`;
-    }
-    html += `</div>`;
-
-    // All headers
-    html += `<div class="card"><h3>📊 All ${headers.length} Headers</h3><br><table><thead><tr><th>Idx</th><th>Header</th><th>Note</th></tr></thead><tbody>`;
-    headers.forEach((h, i) => {
-      const note = Object.entries(COLS).find(([,v])=>v===i)?.[0] || '';
-      const isKey = note !== '';
-      html += `<tr${isKey?' class="hl"':''}><td>${i}</td><td>${h}</td><td><span class="ok">${note?'← '+note.toUpperCase():''}</span></td></tr>`;
-    });
-    html += `</tbody></table></div>`;
-
-    // Totals
-    html += `<div class="card"><h3>📈 Parsed Totals</h3><br>
-      <p><strong>Total Rows:</strong> ${lines.length - 1}</p>
-      <p><strong>Rows skipped (no month):</strong> ${noMonth}</p>
-      <p><strong>Rows skipped (unrecognised status):</strong> ${noStatus}</p>
-      <br>
-      <table><thead><tr><th>Metric</th><th>Value</th><th>Expected (from sheet)</th><th>Match?</th></tr></thead><tbody>
-        <tr><td>Total Qty</td><td><strong>${total.toLocaleString()}</strong></td><td>299,792</td><td><span class="${Math.abs(total-299792)<1000?'ok':'err'}">${Math.abs(total-299792)<1000?'✅':'❌ MISMATCH'}</span></td></tr>
-        <tr><td>Good Qty</td><td>${good.toLocaleString()}</td><td>~256,642</td><td>—</td></tr>
-        <tr><td>Bad Qty</td><td>${bad.toLocaleString()}</td><td>~15,933</td><td>—</td></tr>
-        <tr><td>Rework Qty</td><td>${rework.toLocaleString()}</td><td>~27,224</td><td>—</td></tr>
-      </tbody></table>`;
-
-    html += `<br><h4>Status distribution (raw values from col ${COLS.status}):</h4><table><thead><tr><th>Status Value</th><th>Row Count</th></tr></thead><tbody>`;
-    Object.entries(statusDist).sort((a,b)=>b[1]-a[1]).slice(0,15).forEach(([s,c])=>{
-      html += `<tr><td>${s||'(empty)'}</td><td>${c}</td></tr>`;
-    });
-    html += `</tbody></table>`;
-
-    html += `<br><h4>Month distribution (from col ${COLS.month}):</h4><table><thead><tr><th>Month</th><th>Total Qty</th></tr></thead><tbody>`;
-    Object.entries(monthDist).sort((a,b)=>b[1]-a[1]).forEach(([m,q])=>{
-      html += `<tr><td>${m}</td><td>${q.toLocaleString()}</td></tr>`;
-    });
-    html += `</tbody></table></div>`;
-
-    // Sample rows
-    html += `<div class="card"><h3>🔬 First 3 Data Rows (key columns)</h3><br><table><thead><tr><th>Month</th><th>Channel</th><th>SKU</th><th>Qty</th><th>Status (raw)</th><th>Reason</th></tr></thead><tbody>`;
-    sampleRows.forEach(r => {
-      html += `<tr><td>${r.month}</td><td>${r.ch}</td><td>${r.sku}</td><td>${r.qty}</td><td><strong>${r.status}</strong></td><td>${r.reason}</td></tr>`;
-    });
-    html += `</tbody></table></div>`;
-
-    document.getElementById('output').innerHTML = html;
-  } catch (e) {
-    document.getElementById('status').innerHTML = `<span class="err">❌ Error: ${e.message} — Must be opened from GitHub Pages, not local file</span>`;
+async function loadData(){
+  try{
+    const resp=await fetch(CSV_URL+'&t='+Date.now());
+    if(!resp.ok)throw new Error('HTTP '+resp.status);
+    const csv=await resp.text();
+    RAW_DATA=parseCSV(csv);
+    const ms=new Set(RAW_DATA.map(r=>r.month).filter(Boolean));
+    AVAILABLE_MONTHS=MONTH_ORDER.filter(m=>ms.has(m));
+    document.getElementById('data-source-label').textContent=`✅ Live • ${RAW_DATA.length.toLocaleString()} records • ${AVAILABLE_MONTHS.join(', ')} • Updated ${new Date().toLocaleTimeString()}`;
+  }catch(err){
+    if(RAW_DATA.length===0){RAW_DATA=sampleData();AVAILABLE_MONTHS=MONTH_ORDER.slice(0,5);}
+    document.getElementById('data-source-label').textContent='⚠️ Using cached/sample data';
   }
 }
-run();
+
+function parseCSV(text){
+  const lines=text.split('\n').filter(l=>l.trim());
+  if(lines.length<2)return[];
+  const headers=parseCSVLine(lines[0]).map(h=>h.replace(/"/g,'').trim().toLowerCase());
+  COL.month=findCol(headers,['month']);
+  COL.channel=findCol(headers,['channel name','channel']);
+  COL.sku=findCol(headers,['sku','ean']);
+  COL.product=findCol(headers,['prod','product name','product']);
+  COL.qty=findCol(headers,['qty','quantity']);
+  COL.status=findCol(headers,['status']);
+  COL.reason=findCol(headers,['rejection reason','reason']);
+  if(COL.status<0)COL.status=detectStatusCol(lines.slice(1,50));
+  const data=[];
+  for(let i=1;i<lines.length;i++){
+    const v=parseCSVLine(lines[i]);if(v.length<5)continue;
+    const g=idx=>idx>=0?(v[idx]||'').replace(/"/g,'').trim():'';
+    const month=textToMonth(g(COL.month));if(!month)continue;
+    const status=toStatus(g(COL.status));if(status==='Unknown')continue;
+    const skuVal=g(COL.sku),prodVal=g(COL.product);
+    const qty=Math.max(1,parseInt(g(COL.qty))||1);
+    const cogsRate=COGS[skuVal]||0;
+    data.push({month,status,channel:g(COL.channel)||'Unknown',sku:skuVal,product:prodVal||skuVal||'Unknown',qty,cogsRate,value:Math.round(qty*cogsRate*100)/100,reason:g(COL.reason)||'Unknown',brand:toBrand(skuVal||prodVal)});
+  }
+  return data;
+}
+
+function findCol(h,names){for(const n of names){const i=h.findIndex(x=>x===n||x.includes(n));if(i>=0)return i;}return -1;}
+function detectStatusCol(lines){const sv=new Set(['good','bad','rework','ok','reject','repair']);const cc={};lines.forEach(l=>{parseCSVLine(l).forEach((v,i)=>{if(sv.has((v||'').replace(/"/g,'').trim().toLowerCase()))cc[i]=(cc[i]||0)+1;});});const b=Object.entries(cc).sort((a,b)=>b[1]-a[1])[0];return b?parseInt(b[0]):-1;}
+function parseCSVLine(line){const v=[];let c='',q=false;for(const ch of line){if(ch==='"')q=!q;else if(ch===','&&!q){v.push(c.trim());c='';}else c+=ch;}v.push(c.trim());return v;}
+function textToMonth(s){if(!s)return'';const l=s.toLowerCase();const m={jan:'January',feb:'February',mar:'March',apr:'April',may:'May',jun:'June',jul:'July',aug:'August',sep:'September',oct:'October',nov:'November',dec:'December'};for(const[k,vv]of Object.entries(m))if(l.includes(k))return vv;return'';}
+function toStatus(s){if(!s)return'Unknown';const l=s.toLowerCase().trim();if(l==='good'||l==='ok')return'Good';if(l==='rework'||l==='repair')return'Rework';if(l==='bad'||l==='reject'||l==='rejected')return'Bad';return'Unknown';}
+function toBrand(t){if(!t)return'Be Bodywise';const u=t.toUpperCase();if(u.startsWith('MM')||u.includes('MWMM'))return'Man Matters';if(u.startsWith('LJ')||u.includes('MWLJ'))return'Little Joys';return'Be Bodywise';}
+function fmtVal(v){if(!v)return'₹0';if(v>=1e7)return'₹'+(v/1e7).toFixed(1)+'Cr';if(v>=1e5)return'₹'+(v/1e5).toFixed(1)+'L';if(v>=1000)return'₹'+(v/1000).toFixed(1)+'K';return'₹'+Math.round(v);}
+
+function buildMonthFilters(){
+  const c=document.getElementById('month-filters');
+  c.innerHTML='<button class="filter-btn '+(CURRENT_MONTH==='all'?'active':'')+'" onclick="filterMonth(\'all\',this)">All Months</button>';
+  AVAILABLE_MONTHS.forEach(m=>{const a=CURRENT_MONTH===m.toLowerCase()?'active':'';c.innerHTML+=`<button class="filter-btn ${a}" onclick="filterMonth('${m.toLowerCase()}',this)">${m}</button>`;});
+}
+function filterMonth(m,btn){CURRENT_MONTH=m;document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');processData();renderAll();}
+function startAutoRefresh(){clearInterval(countdownInterval);countdownSeconds=AUTO_REFRESH_SECONDS;updateCountdown();countdownInterval=setInterval(()=>{countdownSeconds--;updateCountdown();if(countdownSeconds<=0){clearInterval(countdownInterval);silentRefresh();}},1000);}
+function updateCountdown(){const m=Math.floor(countdownSeconds/60),s=countdownSeconds%60;document.getElementById('countdown-label').textContent=`Next refresh in ${m}:${String(s).padStart(2,'0')}`;}
+async function silentRefresh(){await loadData();processData();buildMonthFilters();renderAll();startAutoRefresh();}
+async function manualRefresh(){
+  const btn=document.getElementById('refresh-btn');btn.disabled=true;showLoading(true);
+  await loadData();processData();buildMonthFilters();renderAll();showLoading(false);startAutoRefresh();
+  btn.disabled=false;btn.innerHTML='✓ Updated!';
+  setTimeout(()=>{btn.innerHTML='<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg> Refresh Now';},2500);
+}
+
+function filtered(){return CURRENT_MONTH==='all'?RAW_DATA:RAW_DATA.filter(r=>r.month.toLowerCase()===CURRENT_MONTH);}
+function filteredBrand(brand){const f=filtered();return brand==='all'?f:f.filter(r=>r.brand===(brand==='bb'?'Be Bodywise':brand==='mm'?'Man Matters':'Little Joys'));}
+
+function processData(){
+  const f=filtered();
+  ['bb','mm','lj'].forEach(code=>{
+    const name=code==='bb'?'Be Bodywise':code==='mm'?'Man Matters':'Little Joys';
+    const bd=f.filter(r=>r.brand===name);
+    const total=bd.reduce((s,r)=>s+r.qty,0)||1;
+    const good=bd.filter(r=>r.status==='Good').reduce((s,r)=>s+r.qty,0);
+    const rework=bd.filter(r=>r.status==='Rework').reduce((s,r)=>s+r.qty,0);
+    const bad=bd.filter(r=>r.status==='Bad').reduce((s,r)=>s+r.qty,0);
+    const totalValue=bd.reduce((s,r)=>s+r.value,0);
+    const goodValue=bd.filter(r=>r.status==='Good').reduce((s,r)=>s+r.value,0);
+    const badValue=bd.filter(r=>r.status==='Bad').reduce((s,r)=>s+r.value,0);
+    const rwValue=bd.filter(r=>r.status==='Rework').reduce((s,r)=>s+r.value,0);
+    const reasons={};bd.filter(r=>r.status!=='Good').forEach(r=>{reasons[r.reason]=(reasons[r.reason]||0)+r.qty;});
+    const skuMap={};
+    bd.forEach(r=>{
+      const k=r.sku+'|'+r.product;
+      if(!skuMap[k])skuMap[k]={sku:r.sku,name:r.product,tot:0,good:0,bad:0,rw:0,value:0,badValue:0,rwValue:0,cogsRate:r.cogsRate};
+      skuMap[k].tot+=r.qty;skuMap[k].value+=r.value;
+      if(r.status==='Good')skuMap[k].good+=r.qty;
+      else if(r.status==='Bad'){skuMap[k].bad+=r.qty;skuMap[k].badValue+=r.value;}
+      else if(r.status==='Rework'){skuMap[k].rw+=r.qty;skuMap[k].rwValue+=r.value;}
+    });
+    // Sort by total loss value DESC (highest value at top) — CHANGE 6
+    const allSkus=Object.values(skuMap).sort((a,b)=>(b.badValue+b.rwValue)-(a.badValue+a.rwValue));
+    BRANDDATA[code]={name,total,good,rework,bad,totalValue,goodValue,badValue,rwValue,defectRate:((rework+bad)/total*100).toFixed(1),reasons:Object.entries(reasons).sort((a,b)=>b[1]-a[1]).slice(0,8),skus:allSkus.slice(0,10)};// Top 10 per brand
+  });
+}
+
+function renderAll(){renderKPIs();renderBrandScorecard();renderOverviewCharts();renderBrandAnalysis();renderChannelTable();renderSkuTable();renderSkuCharts();renderTrends();renderHeatmap();}
+function showPanel(id,btn){document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));btn.classList.add('active');document.getElementById(id).classList.add('active');}
+
+// ── CHANGE 1: Paired KPI Cards ────────────────────────────────────
+function renderKPIs(){
+  const f=filtered();
+  const total=f.reduce((s,r)=>s+r.qty,0)||1;
+  const good=f.filter(r=>r.status==='Good').reduce((s,r)=>s+r.qty,0);
+  const rework=f.filter(r=>r.status==='Rework').reduce((s,r)=>s+r.qty,0);
+  const bad=f.filter(r=>r.status==='Bad').reduce((s,r)=>s+r.qty,0);
+  const channels=new Set(f.map(r=>r.channel)).size;
+  const totalVal=f.reduce((s,r)=>s+r.value,0);
+  const goodVal=f.filter(r=>r.status==='Good').reduce((s,r)=>s+r.value,0);
+  const badVal=f.filter(r=>r.status==='Bad').reduce((s,r)=>s+r.value,0);
+  const rwVal=f.filter(r=>r.status==='Rework').reduce((s,r)=>s+r.value,0);
+  document.getElementById('kpi-row').innerHTML=`
+    <div class="kpi-pair blue">
+      <div class="kp-side"><div class="kp-label">Total Units</div><div class="kp-val">${total.toLocaleString()}</div><div class="kp-sub">All QC processed</div></div>
+      <div class="kp-side"><div class="kp-label">Total Return Value</div><div class="kp-val sm">${fmtVal(totalVal)}</div><div class="kp-sub">Qty × COGS</div></div>
+    </div>
+    <div class="kpi-pair green">
+      <div class="kp-side"><div class="kp-label">OK Units</div><div class="kp-val">${good.toLocaleString()}</div><div class="kp-sub">${((good/total)*100).toFixed(1)}% pass rate</div></div>
+      <div class="kp-side"><div class="kp-label">OK Return Value</div><div class="kp-val sm" style="color:var(--green)">${fmtVal(goodVal)}</div><div class="kp-sub">Good COGS</div></div>
+    </div>
+    <div class="kpi-pair red">
+      <div class="kp-side"><div class="kp-label">Bad Units</div><div class="kp-val">${bad.toLocaleString()}</div><div class="kp-sub">${((bad/total)*100).toFixed(1)}% rejection</div></div>
+      <div class="kp-side"><div class="kp-label">Bad Return Value</div><div class="kp-val sm" style="color:var(--red)">${fmtVal(badVal)}</div><div class="kp-sub">Defective loss</div></div>
+    </div>
+    <div class="kpi-pair amber">
+      <div class="kp-side"><div class="kp-label">Rework Units</div><div class="kp-val">${rework.toLocaleString()}</div><div class="kp-sub">${((rework/total)*100).toFixed(1)}% of total</div></div>
+      <div class="kp-side"><div class="kp-label">Rework Return Value</div><div class="kp-val sm" style="color:var(--amber)">${fmtVal(rwVal)}</div><div class="kp-sub">Rework exposure</div></div>
+    </div>
+    <div class="kpi-solo"><div class="kp-label">Active Channels</div><div class="kp-val">${channels}</div><div class="kp-sub">Channels with returns</div></div>`;
+}
+
+// ── CHANGE 2: Brand Scorecard with values next to qty ─────────────
+function renderBrandScorecard(){
+  const gt=(BRANDDATA.bb.total+BRANDDATA.mm.total+BRANDDATA.lj.total)||1;
+  document.getElementById('brand-scorecard').innerHTML=['bb','mm','lj'].map((code,idx)=>{
+    const b=BRANDDATA[code];
+    const cls=['bsc-bb','bsc-mm','bsc-lj'],lbl=['BB','MM','LJ'],cats=["Personal Care","Men's Health","Baby Care"];
+    const clrs={bb:['#6366f1','rgba(99,102,241,.1)','rgba(99,102,241,.3)'],mm:['#f97316','rgba(249,115,22,.1)','rgba(249,115,22,.3)'],lj:['#14b8a6','rgba(20,184,166,.1)','rgba(20,184,166,.3)']};
+    const [c,cbg,cbrd]=clrs[code];
+    const gPct=(b.good/b.total*100).toFixed(1),rwPct=(b.rework/b.total*100).toFixed(1),bPct=(b.bad/b.total*100).toFixed(1);
+    return`<div class="brand-score-card ${cls[idx]}">
+      <div class="bsc-header"><div><div class="bsc-name">${b.name}</div><div class="bsc-cat">${cats[idx]}</div></div><div class="bsc-badge" style="background:${cbg};color:${c};border:1.5px solid ${cbrd}">${lbl[idx]}</div></div>
+      <div class="bsc-metrics">
+        <div class="bsc-m"><div class="bsc-m-val">${b.total.toLocaleString()}</div><div class="bsc-m-label">Total Qty</div></div>
+        <div class="bsc-m"><div class="bsc-m-val" style="color:var(--red)">${bPct}%</div><div class="bsc-m-label">Defect %</div></div>
+        <div class="bsc-m"><div class="bsc-m-val" style="color:var(--amber)">${rwPct}%</div><div class="bsc-m-label">Rework %</div></div>
+      </div>
+      <div class="bsc-bar-section">
+        <div class="bsc-bar-row">
+          <div class="bsc-bar-label">✅ Good</div>
+          <div class="bsc-bar-track"><div class="bsc-bar-fill" style="width:${gPct}%;background:#10b981"></div></div>
+          <div class="bsc-bar-pct">${gPct}%</div>
+          <div class="bsc-bar-val" style="color:var(--green)">${fmtVal(b.goodValue)}</div>
+        </div>
+        <div class="bsc-bar-row">
+          <div class="bsc-bar-label">🔄 Rework</div>
+          <div class="bsc-bar-track"><div class="bsc-bar-fill" style="width:${rwPct}%;background:#f59e0b"></div></div>
+          <div class="bsc-bar-pct">${rwPct}%</div>
+          <div class="bsc-bar-val" style="color:var(--amber)">${fmtVal(b.rwValue)}</div>
+        </div>
+        <div class="bsc-bar-row">
+          <div class="bsc-bar-label">❌ Bad</div>
+          <div class="bsc-bar-track"><div class="bsc-bar-fill" style="width:${bPct}%;background:#ef4444"></div></div>
+          <div class="bsc-bar-pct">${bPct}%</div>
+          <div class="bsc-bar-val" style="color:var(--red)">${fmtVal(b.badValue)}</div>
+        </div>
+      </div>
+      <div class="bsc-cogs"><div class="bsc-cogs-label">📦 Total Return Value</div><div class="bsc-cogs-val" style="color:${c}">${fmtVal(b.totalValue)}</div></div>
+    </div>`;
+  }).join('');
+}
+
+// ── CHANGE 3+4: 4 Defect charts + Channel by COUNT ───────────────
+function renderOverviewCharts(){
+  const f=filtered();
+  // 4 defect charts
+  const brandFilters={all:f,bb:f.filter(r=>r.brand==='Be Bodywise'),mm:f.filter(r=>r.brand==='Man Matters'),lj:f.filter(r=>r.brand==='Little Joys')};
+  Object.entries(brandFilters).forEach(([key,rows])=>{
+    const cId='c-defect-'+key;
+    if(CHARTS['defect_'+key])CHARTS['defect_'+key].destroy();
+    const reasons={};rows.filter(r=>r.status!=='Good').forEach(r=>{reasons[r.reason]=(reasons[r.reason]||0)+r.qty;});
+    const sorted=Object.entries(reasons).sort((a,b)=>b[1]-a[1]).slice(0,6);
+    if(!sorted.length)return;
+    CHARTS['defect_'+key]=new Chart(document.getElementById(cId),{
+      type:'doughnut',
+      data:{labels:sorted.map(r=>r[0]),datasets:[{data:sorted.map(r=>r[1]),backgroundColor:PALETTE}]},
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>{const t=sorted.reduce((s,r)=>s+r[1],0);return ctx.label+': '+ctx.parsed.toLocaleString()+' ('+((ctx.parsed/t)*100).toFixed(1)+'%)'}}},datalabels:{color:'#fff',font:{weight:'bold',size:9},formatter:(v,ctx)=>{const t=sorted.reduce((s,r)=>s+r[1],0);return((v/t)*100).toFixed(0)+'%';}}}},
+      plugins:[ChartDataLabels]
+    });
+    // Add legend below
+    const canvas=document.getElementById(cId);
+    let legend=canvas.parentNode.querySelector('.defect-legend');
+    if(!legend){legend=document.createElement('div');legend.className='defect-legend';legend.style.cssText='margin-top:6px;display:flex;flex-wrap:wrap;gap:4px';canvas.parentNode.appendChild(legend);}
+    legend.innerHTML=sorted.map((r,i)=>`<div style="display:flex;align-items:center;gap:3px;font-size:9px;color:var(--t2)"><div style="width:7px;height:7px;border-radius:2px;background:${PALETTE[i]};flex-shrink:0"></div>${r[0].substring(0,12)}</div>`).join('');
+  });
+
+  // CHANGE 4: Top 10 channels by COUNT (bad+rework qty), not %
+  if(CHARTS.channels)CHARTS.channels.destroy();
+  const chMap={};
+  f.forEach(r=>{if(!chMap[r.channel])chMap[r.channel]={bad:0,rework:0};if(r.status==='Bad')chMap[r.channel].bad+=r.qty;if(r.status==='Rework')chMap[r.channel].rework+=r.qty;});
+  const topCh=Object.entries(chMap).map(([ch,d])=>({ch,bad:d.bad,rework:d.rework,total:d.bad+d.rework})).filter(c=>c.total>0).sort((a,b)=>b.total-a.total).slice(0,10);
+  if(topCh.length){
+    CHARTS.channels=new Chart(document.getElementById('c-channels'),{
+      type:'bar',
+      data:{labels:topCh.map(c=>c.ch),datasets:[{label:'Bad (Defect) Count',data:topCh.map(c=>c.bad),backgroundColor:'#ef4444',borderRadius:4},{label:'Rework Count',data:topCh.map(c=>c.rework),backgroundColor:'#f59e0b',borderRadius:4}]},
+      options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{position:'top'},tooltip:{callbacks:{label:ctx=>ctx.dataset.label+': '+ctx.parsed.x.toLocaleString()+' units'}},datalabels:{color:'#fff',font:{weight:'bold',size:9},formatter:v=>v>0?v.toLocaleString():'',anchor:'end',align:'start'}},scales:{x:{stacked:false,title:{display:true,text:'Count of Units'}}}},
+      plugins:[ChartDataLabels]
+    });
+  }
+}
+
+// ── BRAND ANALYSIS ────────────────────────────────────────────────
+function renderBrandAnalysis(){
+  if(CHARTS.brandRadar)CHARTS.brandRadar.destroy();
+  const bb=BRANDDATA.bb,mm=BRANDDATA.mm,lj=BRANDDATA.lj;
+  const rd=b=>[
+    parseFloat((b.good/b.total*100).toFixed(1)),
+    parseFloat((100-parseFloat(b.defectRate)).toFixed(1)),
+    parseFloat(Math.max(0,100-(b.rework/b.total*100*5)).toFixed(1)),
+    parseFloat(Math.max(0,100-(b.bad/b.total*100*5)).toFixed(1)),
+    parseFloat((b.total/(bb.total+mm.total+lj.total)*100).toFixed(1))
+  ];
+  CHARTS.brandRadar=new Chart(document.getElementById('c-brand-radar'),{type:'radar',data:{labels:['Good Rate %','Pass Quality','Rework Control','Defect Control','Volume Share %'],datasets:[{label:'Be Bodywise',data:rd(bb),borderColor:'#6366f1',backgroundColor:'rgba(99,102,241,.12)',borderWidth:2,pointBackgroundColor:'#6366f1',pointRadius:4},{label:'Man Matters',data:rd(mm),borderColor:'#f97316',backgroundColor:'rgba(249,115,22,.12)',borderWidth:2,pointBackgroundColor:'#f97316',pointRadius:4},{label:'Little Joys',data:rd(lj),borderColor:'#14b8a6',backgroundColor:'rgba(20,184,166,.12)',borderWidth:2,pointBackgroundColor:'#14b8a6',pointRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{boxWidth:10,font:{size:10}}},datalabels:{display:false}},scales:{r:{beginAtZero:true,max:100,ticks:{font:{size:9},stepSize:20},pointLabels:{font:{size:10}}}}}});
+
+  const metrics=[
+    {label:'Total Qty',bb:bb.total.toLocaleString(),mm:mm.total.toLocaleString(),lj:lj.total.toLocaleString()},
+    {label:'Total Value',bb:fmtVal(bb.totalValue),mm:fmtVal(mm.totalValue),lj:fmtVal(lj.totalValue)},
+    {label:'Good Qty',bb:bb.good.toLocaleString(),mm:mm.good.toLocaleString(),lj:lj.good.toLocaleString()},
+    {label:'Good Value',bb:fmtVal(bb.goodValue),mm:fmtVal(mm.goodValue),lj:fmtVal(lj.goodValue)},
+    {label:'Bad Qty',bb:bb.bad.toLocaleString(),mm:mm.bad.toLocaleString(),lj:lj.bad.toLocaleString()},
+    {label:'Bad Value ₹',bb:fmtVal(bb.badValue),mm:fmtVal(mm.badValue),lj:fmtVal(lj.badValue)},
+    {label:'Rework Qty',bb:bb.rework.toLocaleString(),mm:mm.rework.toLocaleString(),lj:lj.rework.toLocaleString()},
+    {label:'Rework Value ₹',bb:fmtVal(bb.rwValue),mm:fmtVal(mm.rwValue),lj:fmtVal(lj.rwValue)},
+    {label:'Defect %',bb:bb.defectRate+'%',mm:mm.defectRate+'%',lj:lj.defectRate+'%'},
+  ];
+  document.getElementById('brand-metrics-grid').innerHTML=`<table style="width:100%;border-collapse:collapse;font-size:11px">
+    <thead><tr>
+      <th style="padding:7px 10px;background:var(--s2);border-bottom:2px solid var(--border);text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.4px">Metric</th>
+      <th style="padding:7px 10px;background:rgba(99,102,241,.08);border-bottom:2px solid var(--bb);text-align:center;font-weight:700;color:var(--bb);font-size:10px">Be Bodywise</th>
+      <th style="padding:7px 10px;background:rgba(249,115,22,.08);border-bottom:2px solid var(--mm);text-align:center;font-weight:700;color:var(--mm);font-size:10px">Man Matters</th>
+      <th style="padding:7px 10px;background:rgba(20,184,166,.08);border-bottom:2px solid var(--lj);text-align:center;font-weight:700;color:var(--lj);font-size:10px">Little Joys</th>
+    </tr></thead>
+    <tbody>${metrics.map((m,i)=>`<tr style="background:${i%2===0?'var(--s2)':'var(--s1)'}">
+      <td style="padding:7px 10px;font-weight:600;color:var(--t2);font-size:10px;text-transform:uppercase;letter-spacing:.3px">${m.label}</td>
+      <td style="padding:7px 10px;text-align:center;font-family:var(--mono);font-weight:600;font-size:11px;color:var(--bb)">${m.bb}</td>
+      <td style="padding:7px 10px;text-align:center;font-family:var(--mono);font-weight:600;font-size:11px;color:var(--mm)">${m.mm}</td>
+      <td style="padding:7px 10px;text-align:center;font-family:var(--mono);font-weight:600;font-size:11px;color:var(--lj)">${m.lj}</td>
+    </tr>`).join('')}</tbody></table>`;
+
+  const colors=PALETTE;
+  document.getElementById('brand-reason-charts').innerHTML=['bb','mm','lj'].map(code=>{const b=BRANDDATA[code],total=b.reasons.reduce((s,r)=>s+r[1],0)||1;return`<div class="card"><div class="card-head"><div class="card-title" style="color:var(--${code})">${b.name} — Return Reasons</div></div><div class="reason-bars">${b.reasons.map((r,i)=>{const pct=(r[1]/total*100).toFixed(1);return`<div class="rb-row"><div class="rb-label">${r[0]}</div><div class="rb-track"><div class="rb-fill" style="width:${pct}%;background:${colors[i]}">${r[1].toLocaleString()}</div></div><div class="rb-pct">${pct}%</div></div>`;}).join('')}</div></div>`;}).join('');
+}
+
+// ── CHANGE 5: Channel Table — sorted by Bad+Rework VALUE ──────────
+function setChBrand(brand,btn){CH_BRAND=brand;document.querySelectorAll('#channels .tog-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');renderChannelTable();}
+
+function renderChannelTable(){
+  let f=filtered();
+  if(CH_BRAND!=='all'){const name=CH_BRAND==='bb'?'Be Bodywise':CH_BRAND==='mm'?'Man Matters':'Little Joys';f=f.filter(r=>r.brand===name);}
+  const chMap={};
+  f.forEach(r=>{if(!chMap[r.channel])chMap[r.channel]={good:0,rework:0,bad:0,rwVal:0,badVal:0};
+    if(r.status==='Good')chMap[r.channel].good+=r.qty;
+    else if(r.status==='Rework'){chMap[r.channel].rework+=r.qty;chMap[r.channel].rwVal+=r.value;}
+    else if(r.status==='Bad'){chMap[r.channel].bad+=r.qty;chMap[r.channel].badVal+=r.value;}
+  });
+  // CHANGE 5: Sort by total loss value DESC
+  const sorted=Object.entries(chMap).sort((a,b)=>(b[1].badVal+b[1].rwVal)-(a[1].badVal+a[1].rwVal));
+  document.getElementById('ch-tbody').innerHTML=sorted.map(([ch,d])=>{
+    const tot=d.good+d.rework+d.bad||1;
+    const defR=((d.bad/tot)*100).toFixed(1),rwR=((d.rework/tot)*100).toFixed(1),totR=((d.rework+d.bad)/tot*100);
+    const risk=totR>30?'badge-crit':totR>20?'badge-high':totR>10?'badge-med':'badge-low';
+    const label=totR>30?'CRITICAL':totR>20?'HIGH':totR>10?'MEDIUM':'OK';
+    const totalLoss=d.badVal+d.rwVal;
+    return`<tr>
+      <td style="font-weight:600">${ch}</td>
+      <td class="nm">${tot.toLocaleString()}</td>
+      <td class="nm" style="color:var(--green)">${d.good.toLocaleString()}</td>
+      <td class="nm" style="color:var(--red)">${d.bad.toLocaleString()}</td>
+      <td class="nm" style="color:var(--amber)">${d.rework.toLocaleString()}</td>
+      <td><span class="value-chip" style="background:rgba(239,68,68,.1);color:var(--red);border-color:rgba(239,68,68,.25)">${fmtVal(d.badVal)}</span></td>
+      <td><span class="value-chip" style="background:rgba(245,158,11,.1);color:var(--amber);border-color:rgba(245,158,11,.25)">${fmtVal(d.rwVal)}</span></td>
+      <td><span class="value-chip" style="background:rgba(220,38,38,.12);color:#dc2626;border-color:rgba(220,38,38,.3);font-weight:700">${fmtVal(totalLoss)}</span></td>
+      <td><div class="mini-bar-wrap"><div class="mini-bar"><div class="mini-fill" style="width:${Math.min(100,defR)}%;background:var(--red)"></div></div><span class="nm">${defR}%</span></div></td>
+      <td><div class="mini-bar-wrap"><div class="mini-bar"><div class="mini-fill" style="width:${Math.min(100,rwR)}%;background:var(--amber)"></div></div><span class="nm">${rwR}%</span></div></td>
+      <td><span class="badge ${risk}">${label}</span></td>
+    </tr>`;
+  }).join('');
+}
+
+// ── CHANGE 6: SKU Table — Top 10 per brand (30 total), by VALUE ───
+function setSkuBrand(brand,btn){SKU_BRAND=brand;document.querySelectorAll('#skus .tog-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');renderSkuTable();}
+
+function renderSkuTable(){
+  const bColors={bb:'#6366f1',mm:'#f97316',lj:'#14b8a6'};
+  let skus=[];
+  if(SKU_BRAND==='all'){
+    // Top 10 per brand, then re-sort all 30 by total loss value
+    ['bb','mm','lj'].forEach(code=>BRANDDATA[code].skus.forEach(s=>skus.push({...s,code})));
+    skus.sort((a,b)=>(b.badValue+b.rwValue)-(a.badValue+a.rwValue));
+  }else{
+    skus=BRANDDATA[SKU_BRAND].skus.map(s=>({...s,code:SKU_BRAND}));
+  }
+  document.getElementById('sku-tbody').innerHTML=skus.map((s,i)=>{
+    const tot=s.tot||1,dP=(s.bad/tot*100).toFixed(1),rP=(s.rw/tot*100).toFixed(1),tD=((s.bad+s.rw)/tot*100).toFixed(1);
+    const bc=tD>70?'badge-crit':tD>50?'badge-high':tD>25?'badge-med':'badge-low';
+    const rl=tD>70?'CRITICAL':tD>50?'HIGH':tD>25?'MEDIUM':'OK';
+    const totalLoss=s.badValue+s.rwValue;
+    return`<tr>
+      <td class="nm" style="font-weight:700;color:var(--t3)">#${i+1}</td>
+      <td><span style="display:inline-block;width:6px;height:6px;border-radius:2px;background:${bColors[s.code]};margin-right:4px;vertical-align:middle"></span><span style="font-size:9px;color:var(--t2)">${s.code.toUpperCase()}</span></td>
+      <td class="nm" style="font-size:9px;color:var(--t3);max-width:80px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${s.sku}</td>
+      <td style="font-size:10px;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${s.name}</td>
+      <td class="nm">${s.tot.toLocaleString()}</td>
+      <td class="nm" style="color:var(--green)">${s.good.toLocaleString()}</td>
+      <td class="nm" style="color:var(--red)">${s.bad.toLocaleString()}</td>
+      <td class="nm" style="color:var(--amber)">${s.rw.toLocaleString()}</td>
+      <td class="nm">${s.cogsRate>0?'₹'+s.cogsRate.toFixed(0):'—'}</td>
+      <td><span class="value-chip" style="background:rgba(239,68,68,.1);color:var(--red);border-color:rgba(239,68,68,.25)">${s.badValue>0?fmtVal(s.badValue):'—'}</span></td>
+      <td><span class="value-chip" style="background:rgba(245,158,11,.1);color:var(--amber);border-color:rgba(245,158,11,.25)">${s.rwValue>0?fmtVal(s.rwValue):'—'}</span></td>
+      <td><span class="value-chip" style="font-weight:700;background:rgba(220,38,38,.1);color:#dc2626;border-color:rgba(220,38,38,.25)">${totalLoss>0?fmtVal(totalLoss):'—'}</span></td>
+      <td><div class="mini-bar-wrap"><div class="mini-bar"><div class="mini-fill" style="width:${Math.min(100,s.bad/tot*100)}%;background:var(--red)"></div></div><span class="nm">${dP}%</span></div></td>
+      <td><div class="mini-bar-wrap"><div class="mini-bar"><div class="mini-fill" style="width:${Math.min(100,s.rw/tot*100)}%;background:var(--amber)"></div></div><span class="nm">${rP}%</span></div></td>
+      <td><span class="badge ${bc}">${rl}</span></td>
+    </tr>`;
+  }).join('');
+}
+
+function renderSkuCharts(){
+  ['mm','lj'].forEach(code=>{
+    const key='sku'+code.toUpperCase();if(CHARTS[key])CHARTS[key].destroy();
+    const skus=BRANDDATA[code].skus.slice(0,6);if(!skus.length)return;
+    CHARTS[key]=new Chart(document.getElementById('c-sku-'+code),{type:'bar',data:{labels:skus.map(s=>s.name.substring(0,20)),datasets:[{label:'Bad Value ₹',data:skus.map(s=>Math.round(s.badValue)),backgroundColor:'rgba(239,68,68,.85)',borderRadius:3},{label:'Rework Value ₹',data:skus.map(s=>Math.round(s.rwValue)),backgroundColor:'rgba(245,158,11,.85)',borderRadius:3}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{boxWidth:8,font:{size:9}}},tooltip:{callbacks:{label:ctx=>ctx.dataset.label+': '+fmtVal(ctx.parsed.x)}}},scales:{x:{ticks:{callback:v=>fmtVal(v)}},y:{ticks:{font:{size:9}}}}}});
+  });
+}
+
+function renderTrends(){
+  const mData={};AVAILABLE_MONTHS.forEach(m=>mData[m]={bb:{tot:0,def:0,rw:0},mm:{tot:0,def:0,rw:0},lj:{tot:0,def:0,rw:0}});
+  RAW_DATA.forEach(r=>{if(!mData[r.month])return;const c=r.brand==='Be Bodywise'?'bb':r.brand==='Man Matters'?'mm':'lj';mData[r.month][c].tot+=r.qty;if(r.status==='Bad')mData[r.month][c].def+=r.qty;if(r.status==='Rework')mData[r.month][c].rw+=r.qty;});
+  const labels=AVAILABLE_MONTHS;
+  if(CHARTS.trendDR)CHARTS.trendDR.destroy();
+  CHARTS.trendDR=new Chart(document.getElementById('c-trend-dr'),{type:'line',data:{labels,datasets:[{label:'BB Defect%',data:labels.map(m=>mData[m].bb.tot?(mData[m].bb.def/mData[m].bb.tot*100).toFixed(1):null),borderColor:'#6366f1',backgroundColor:'#6366f1',tension:0.4,fill:false,pointRadius:5,borderWidth:2.5},{label:'BB Rework%',data:labels.map(m=>mData[m].bb.tot?(mData[m].bb.rw/mData[m].bb.tot*100).toFixed(1):null),borderColor:'#6366f1',backgroundColor:'#6366f1',tension:0.4,fill:false,pointRadius:3,borderWidth:1.5,borderDash:[5,5]},{label:'MM Defect%',data:labels.map(m=>mData[m].mm.tot?(mData[m].mm.def/mData[m].mm.tot*100).toFixed(1):null),borderColor:'#f97316',backgroundColor:'#f97316',tension:0.4,fill:false,pointRadius:5,borderWidth:2.5},{label:'MM Rework%',data:labels.map(m=>mData[m].mm.tot?(mData[m].mm.rw/mData[m].mm.tot*100).toFixed(1):null),borderColor:'#f97316',backgroundColor:'#f97316',tension:0.4,fill:false,pointRadius:3,borderWidth:1.5,borderDash:[5,5]},{label:'LJ Defect%',data:labels.map(m=>mData[m].lj.tot?(mData[m].lj.def/mData[m].lj.tot*100).toFixed(1):null),borderColor:'#14b8a6',backgroundColor:'#14b8a6',tension:0.4,fill:false,pointRadius:5,borderWidth:2.5},{label:'LJ Rework%',data:labels.map(m=>mData[m].lj.tot?(mData[m].lj.rw/mData[m].lj.tot*100).toFixed(1):null),borderColor:'#14b8a6',backgroundColor:'#14b8a6',tension:0.4,fill:false,pointRadius:3,borderWidth:1.5,borderDash:[5,5]}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{boxWidth:10,font:{size:9}}},tooltip:{callbacks:{label:ctx=>ctx.dataset.label+': '+ctx.parsed.y+'%'}}},scales:{y:{beginAtZero:true,title:{display:true,text:'%'}}}}});
+  if(CHARTS.trendVol)CHARTS.trendVol.destroy();
+  const vd={};AVAILABLE_MONTHS.forEach(m=>vd[m]={bb:0,mm:0,lj:0});
+  RAW_DATA.forEach(r=>{if(!vd[r.month])return;const c=r.brand==='Be Bodywise'?'bb':r.brand==='Man Matters'?'mm':'lj';vd[r.month][c]+=r.qty;});
+  CHARTS.trendVol=new Chart(document.getElementById('c-trend-vol'),{type:'bar',data:{labels,datasets:[{label:'Be Bodywise',data:labels.map(m=>vd[m].bb),backgroundColor:'#6366f1'},{label:'Man Matters',data:labels.map(m=>vd[m].mm),backgroundColor:'#f97316'},{label:'Little Joys',data:labels.map(m=>vd[m].lj),backgroundColor:'#14b8a6'}]},options:{responsive:true,maintainAspectRatio:false,scales:{x:{stacked:true},y:{stacked:true}},plugins:{datalabels:{color:'#fff',font:{weight:'bold',size:9},formatter:(v,ctx)=>{const t=[vd[labels[ctx.dataIndex]].bb,vd[labels[ctx.dataIndex]].mm,vd[labels[ctx.dataIndex]].lj].reduce((a,b)=>a+b,0);return t&&v>0?((v/t)*100).toFixed(0)+'%':'';},display:ctx=>ctx.dataset.data[ctx.dataIndex]>0}}},plugins:[ChartDataLabels]});
+  if(CHARTS.trendCat)CHARTS.trendCat.destroy();
+  const cd={};AVAILABLE_MONTHS.forEach(m=>cd[m]={good:0,rework:0,bad:0});
+  RAW_DATA.forEach(r=>{if(!cd[r.month])return;if(r.status==='Good')cd[r.month].good+=r.qty;else if(r.status==='Rework')cd[r.month].rework+=r.qty;else if(r.status==='Bad')cd[r.month].bad+=r.qty;});
+  CHARTS.trendCat=new Chart(document.getElementById('c-trend-cat'),{type:'line',data:{labels,datasets:[{label:'Good',data:labels.map(m=>cd[m].good),borderColor:'#10b981',backgroundColor:'rgba(16,185,129,.15)',fill:true,tension:0.4,borderWidth:2},{label:'Rework',data:labels.map(m=>cd[m].rework),borderColor:'#f59e0b',backgroundColor:'rgba(245,158,11,.15)',fill:true,tension:0.4,borderWidth:2},{label:'Bad',data:labels.map(m=>cd[m].bad),borderColor:'#ef4444',backgroundColor:'rgba(239,68,68,.15)',fill:true,tension:0.4,borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false}});
+  if(CHARTS.channelTrend)CHARTS.channelTrend.destroy();
+  const chVol={};RAW_DATA.forEach(r=>{chVol[r.channel]=(chVol[r.channel]||0)+r.qty;});
+  const top5=Object.entries(chVol).sort((a,b)=>b[1]-a[1]).slice(0,5).map(c=>c[0]);
+  const chM={};top5.forEach(ch=>{chM[ch]={};AVAILABLE_MONTHS.forEach(m=>chM[ch][m]={good:0,bad:0,rework:0,total:0});});
+  RAW_DATA.forEach(r=>{if(!top5.includes(r.channel)||!chM[r.channel][r.month])return;chM[r.channel][r.month].total+=r.qty;if(r.status==='Good')chM[r.channel][r.month].good+=r.qty;else if(r.status==='Bad')chM[r.channel][r.month].bad+=r.qty;else if(r.status==='Rework')chM[r.channel][r.month].rework+=r.qty;});
+  const clrs=['#3b82f6','#10b981','#f59e0b','#ef4444','#8b5cf6'];const ds=[];
+  top5.forEach((ch,i)=>{const p=k=>labels.map(m=>{const d=chM[ch][m];return d.total?((d[k]/d.total)*100).toFixed(1):null;});ds.push({label:ch+' Good%',data:p('good'),borderColor:clrs[i],backgroundColor:clrs[i],tension:0.4,fill:false,borderWidth:2,pointRadius:3});ds.push({label:ch+' Bad%',data:p('bad'),borderColor:clrs[i],backgroundColor:clrs[i],tension:0.4,fill:false,borderWidth:1.5,borderDash:[5,5],pointRadius:2});ds.push({label:ch+' Rework%',data:p('rework'),borderColor:clrs[i],backgroundColor:clrs[i],tension:0.4,fill:false,borderWidth:1,borderDash:[2,2],pointRadius:2});});
+  CHARTS.channelTrend=new Chart(document.getElementById('c-channel-trend'),{type:'line',data:{labels,datasets:ds},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{boxWidth:8,font:{size:9}}},tooltip:{callbacks:{label:ctx=>ctx.dataset.label+': '+ctx.parsed.y+'%'}}},scales:{y:{beginAtZero:true,max:100,title:{display:true,text:'%'}}}}});
+}
+
+// ── CHANGE 7: Heatmap — channels sorted by total defect count ─────
+function renderHeatmap(){
+  const f=filtered();
+  // Count total defects per channel (bad + rework qty)
+  const chDefects={};
+  f.filter(r=>r.status!=='Good').forEach(r=>{chDefects[r.channel]=(chDefects[r.channel]||0)+r.qty;});
+  // Sort channels by total defect count DESC
+  const top20=Object.entries(chDefects).sort((a,b)=>b[1]-a[1]).slice(0,20).map(c=>c[0]);
+
+  const dTypes={};f.filter(r=>r.status!=='Good').forEach(r=>{dTypes[r.reason]=(dTypes[r.reason]||0)+r.qty;});
+  const topDef=Object.keys(dTypes).sort((a,b)=>dTypes[b]-dTypes[a]).slice(0,8);
+  const hm={};top20.forEach(ch=>{hm[ch]={};topDef.forEach(d=>hm[ch][d]=0);});
+  f.forEach(r=>{if(top20.includes(r.channel)&&topDef.includes(r.reason)&&r.status!=='Good')hm[r.channel][r.reason]+=r.qty;});
+  let maxVal=0;Object.values(hm).forEach(row=>Object.values(row).forEach(v=>{if(v>maxVal)maxVal=v;}));
+  const gc=v=>{if(!v)return'#f4f5f8';const i=v/maxVal;if(i>.7)return'#dc2626';if(i>.5)return'#ef4444';if(i>.3)return'#f97316';if(i>.15)return'#f59e0b';return'#fbbf24';};
+  document.getElementById('heatmap-container').innerHTML=`
+    <div class="hm-header"><div class="hm-label">Channel (by defect count↓)</div>${topDef.map(d=>`<div class="hm-label">${d.substring(0,10)}</div>`).join('')}</div>
+    <div class="heatmap-grid">${top20.map(ch=>`<div class="hm-row">
+      <div class="hm-ch">${ch} <span style="font-size:9px;color:var(--t3)">(${chDefects[ch]||0})</span></div>
+      ${topDef.map(d=>{const v=hm[ch][d];return`<div class="hm-cell" style="background:${gc(v)};color:${v>maxVal*.5?'#fff':'var(--t1)'}" title="${ch} · ${d}: ${v}">${v||''}</div>`;}).join('')}
+    </div>`).join('')}</div>`;
+}
+
+let sortDir={};
+function sortTable(id,col){const tb=document.getElementById(id),rows=Array.from(tb.querySelectorAll('tr'));sortDir[col]=!sortDir[col];rows.sort((a,b)=>{const av=a.cells[col]?.textContent.trim()||'',bv=b.cells[col]?.textContent.trim()||'';const an=parseFloat(av.replace(/[^\d.-]/g,'')),bn=parseFloat(bv.replace(/[^\d.-]/g,''));const cmp=isNaN(an)?av.localeCompare(bv):an-bn;return sortDir[col]?cmp:-cmp;});rows.forEach(r=>tb.appendChild(r));}
+
+function sampleData(){
+  const ch=['Amazon','Flipkart','Myntra','Nykaa','Purplle','Blinkit'],st=['Good','Rework','Bad'],rs=['Rate Sticker','Box Damaged','Near Expiry','Missing Items'];
+  const data=[];
+  for(let i=0;i<5000;i++){const b=['Be Bodywise','Man Matters','Little Joys'][i%3];const sku=b.substring(0,2).toUpperCase()+(10000+i);const cr=COGS[sku]||50;const qty=Math.floor(Math.random()*30)+1;data.push({month:['January','February','March','April','May'][i%5],channel:ch[i%ch.length],brand:b,sku,product:b+' Product '+(i%10),qty,cogsRate:cr,value:qty*cr,status:st[Math.floor(Math.random()*3)],reason:rs[Math.floor(Math.random()*rs.length)]});}
+  return data;
+}
+init();
 </script>
 </body>
 </html>
