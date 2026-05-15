@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>RTV QC — Column Diagnostic</title>
+<style>
+body{font-family:monospace;background:#f8f9fc;color:#1a1d2e;padding:24px}
+h2{margin-bottom:16px;color:#3b82f6}
+.card{background:#fff;border:2px solid #d5d8e0;border-radius:12px;padding:20px;margin-bottom:20px}
+.ok{color:#10b981;font-weight:700}
+.warn{color:#f59e0b;font-weight:700}
+.err{color:#ef4444;font-weight:700}
+table{border-collapse:collapse;width:100%;font-size:12px}
+th,td{padding:7px 12px;border:1px solid #d5d8e0;text-align:left}
+th{background:#f4f5f8;font-weight:700}
+.hl{background:#fef3c7}
+</style>
+</head>
+<body>
+<h2>🔍 RTV Dashboard — Column Diagnostic Tool</h2>
+<div class="card">
+  <div id="status">Fetching CSV from Google Sheets...</div>
+</div>
+<div id="output"></div>
+
+<script>
+const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSismHdOKJigedmrPENc8HXyW4TvqHek7e1ASCluZfi1s3jgQPZGhYJQjb_F5IoarAnOmybH7aIqrWG/pub?gid=1227720756&single=true&output=csv';
+
+function parseCSVLine(line) {
+  const vals = []; let cur = '', inQ = false;
+  for (const c of line) {
+    if (c === '"') inQ = !inQ;
+    else if (c === ',' && !inQ) { vals.push(cur.trim()); cur = ''; }
+    else cur += c;
+  }
+  vals.push(cur.trim());
+  return vals.map(v => v.replace(/^"|"$/g, '').trim());
+}
+
+async function run() {
+  try {
+    const resp = await fetch(CSV_URL + '&t=' + Date.now());
+    const text = await resp.text();
+    const lines = text.split('\n').filter(l => l.trim());
+    
+    document.getElementById('status').innerHTML = `<span class="ok">✅ CSV fetched — ${lines.length - 1} rows, ${lines[0].split(',').length} columns</span>`;
+
+    const headers = parseCSVLine(lines[0]);
+    const headersLower = headers.map(h => h.toLowerCase().trim());
+
+    // --- DETECT COLUMNS ---
+    function findCol(names) {
+      for (const n of names) {
+        const i = headersLower.findIndex(h => h === n || h.includes(n));
+        if (i >= 0) return i;
+      }
+      return -1;
+    }
+
+    // Detect status from data rows (primary)
+    const statusVals = new Set(['good','bad','rework','ok','reject','repair','rejected']);
+    const colCounts = {};
+    lines.slice(1, 100).forEach(line => {
+      parseCSVLine(line).forEach((v, i) => {
+        if (statusVals.has(v.toLowerCase())) colCounts[i] = (colCounts[i] || 0) + 1;
+      });
+    });
+    const dataStatus = Object.entries(colCounts).sort((a, b) => b[1] - a[1])[0];
+    const statusByData = dataStatus ? parseInt(dataStatus[0]) : -1;
+    const statusByHeader = findCol(['status']);
+
+    const COLS = {
+      month:   findCol(['month']),
+      channel: findCol(['channel name', 'channel']),
+      sku:     findCol(['sku', 'ean']),
+      product: findCol(['prod', 'product name', 'product']),
+      qty:     findCol(['qty', 'quantity']),
+      status:  statusByData >= 0 ? statusByData : statusByHeader,
+      reason:  findCol(['rejection reason', 'reason'])
+    };
+
+    // --- PARSE DATA ---
+    let total=0, good=0, bad=0, rework=0, noStatus=0, noMonth=0;
+    const statusDist = {}, monthDist = {};
+    const sampleRows = [];
+
+    lines.slice(1).forEach((line, idx) => {
+      const v = parseCSVLine(line);
+      if (v.length < 5) return;
+      const g = i => i >= 0 ? (v[i] || '') : '';
+      const month = g(COLS.month);
+      const statusRaw = g(COLS.status);
+      const qty = parseInt(g(COLS.qty)) || 0;
+
+      if (!month) { noMonth++; return; }
+      statusDist[statusRaw] = (statusDist[statusRaw] || 0) + 1;
+      if (['Good','Bad','Rework','good','bad','rework','ok'].includes(statusRaw)) {
+        const sNorm = statusRaw.charAt(0).toUpperCase() + statusRaw.slice(1).toLowerCase();
+        total += qty;
+        if (sNorm === 'Good' || statusRaw.toLowerCase() === 'ok') good += qty;
+        else if (sNorm === 'Bad') bad += qty;
+        else if (sNorm === 'Rework') rework += qty;
+        const m = (month.toLowerCase().includes('jan')?'January':month.toLowerCase().includes('feb')?'February':month.toLowerCase().includes('mar')?'March':month.toLowerCase().includes('apr')?'April':month.toLowerCase().includes('may')?'May':month);
+        monthDist[m] = (monthDist[m] || 0) + qty;
+      } else noStatus++;
+
+      if (sampleRows.length < 3) {
+        sampleRows.push({month, ch: g(COLS.channel), sku: g(COLS.sku), qty: g(COLS.qty), status: statusRaw, reason: g(COLS.reason)});
+      }
+    });
+
+    let html = '';
+
+    // Column map table
+    html += `<div class="card"><h3>📋 Column Mapping</h3><br><table><thead><tr><th>Field</th><th>Idx</th><th>Header Found</th><th>Status</th></tr></thead><tbody>`;
+    Object.entries(COLS).forEach(([field, idx]) => {
+      const h = idx >= 0 ? headers[idx] : 'NOT FOUND';
+      const ok = idx >= 0;
+      html += `<tr${field==='status'||field==='qty'||field==='month'?' class="hl"':''}>
+        <td><strong>${field}</strong></td>
+        <td>${idx}</td>
+        <td>${h}</td>
+        <td><span class="${ok?'ok':'err'}">${ok?'✅':'❌ MISSING'}</span></td>
+      </tr>`;
+    });
+    html += `</tbody></table>`;
+    html += `<br><p><strong>Status detected by data scan:</strong> idx ${statusByData} — ${statusByData>=0?headers[statusByData]:'not found'}</p>`;
+    html += `<p><strong>Status detected by header name:</strong> idx ${statusByHeader} — ${statusByHeader>=0?headers[statusByHeader]:'not found'}</p>`;
+    if (statusByData !== statusByHeader) {
+      html += `<p class="err">⚠️ MISMATCH: Data scan says ${statusByData}, header says ${statusByHeader}. Using data scan result.</p>`;
+    } else {
+      html += `<p class="ok">✅ Both methods agree on Status column idx ${statusByData}</p>`;
+    }
+    html += `</div>`;
+
+    // All headers
+    html += `<div class="card"><h3>📊 All ${headers.length} Headers</h3><br><table><thead><tr><th>Idx</th><th>Header</th><th>Note</th></tr></thead><tbody>`;
+    headers.forEach((h, i) => {
+      const note = Object.entries(COLS).find(([,v])=>v===i)?.[0] || '';
+      const isKey = note !== '';
+      html += `<tr${isKey?' class="hl"':''}><td>${i}</td><td>${h}</td><td><span class="ok">${note?'← '+note.toUpperCase():''}</span></td></tr>`;
+    });
+    html += `</tbody></table></div>`;
+
+    // Totals
+    html += `<div class="card"><h3>📈 Parsed Totals</h3><br>
+      <p><strong>Total Rows:</strong> ${lines.length - 1}</p>
+      <p><strong>Rows skipped (no month):</strong> ${noMonth}</p>
+      <p><strong>Rows skipped (unrecognised status):</strong> ${noStatus}</p>
+      <br>
+      <table><thead><tr><th>Metric</th><th>Value</th><th>Expected (from sheet)</th><th>Match?</th></tr></thead><tbody>
+        <tr><td>Total Qty</td><td><strong>${total.toLocaleString()}</strong></td><td>299,792</td><td><span class="${Math.abs(total-299792)<1000?'ok':'err'}">${Math.abs(total-299792)<1000?'✅':'❌ MISMATCH'}</span></td></tr>
+        <tr><td>Good Qty</td><td>${good.toLocaleString()}</td><td>~256,642</td><td>—</td></tr>
+        <tr><td>Bad Qty</td><td>${bad.toLocaleString()}</td><td>~15,933</td><td>—</td></tr>
+        <tr><td>Rework Qty</td><td>${rework.toLocaleString()}</td><td>~27,224</td><td>—</td></tr>
+      </tbody></table>`;
+
+    html += `<br><h4>Status distribution (raw values from col ${COLS.status}):</h4><table><thead><tr><th>Status Value</th><th>Row Count</th></tr></thead><tbody>`;
+    Object.entries(statusDist).sort((a,b)=>b[1]-a[1]).slice(0,15).forEach(([s,c])=>{
+      html += `<tr><td>${s||'(empty)'}</td><td>${c}</td></tr>`;
+    });
+    html += `</tbody></table>`;
+
+    html += `<br><h4>Month distribution (from col ${COLS.month}):</h4><table><thead><tr><th>Month</th><th>Total Qty</th></tr></thead><tbody>`;
+    Object.entries(monthDist).sort((a,b)=>b[1]-a[1]).forEach(([m,q])=>{
+      html += `<tr><td>${m}</td><td>${q.toLocaleString()}</td></tr>`;
+    });
+    html += `</tbody></table></div>`;
+
+    // Sample rows
+    html += `<div class="card"><h3>🔬 First 3 Data Rows (key columns)</h3><br><table><thead><tr><th>Month</th><th>Channel</th><th>SKU</th><th>Qty</th><th>Status (raw)</th><th>Reason</th></tr></thead><tbody>`;
+    sampleRows.forEach(r => {
+      html += `<tr><td>${r.month}</td><td>${r.ch}</td><td>${r.sku}</td><td>${r.qty}</td><td><strong>${r.status}</strong></td><td>${r.reason}</td></tr>`;
+    });
+    html += `</tbody></table></div>`;
+
+    document.getElementById('output').innerHTML = html;
+  } catch (e) {
+    document.getElementById('status').innerHTML = `<span class="err">❌ Error: ${e.message} — Must be opened from GitHub Pages, not local file</span>`;
+  }
+}
+run();
+</script>
+</body>
+</html>
